@@ -15,6 +15,9 @@ const cors = require('cors');
 const crypto = require('crypto');
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// Account runs Managed Payments — needs the basil API version, which the
+// stripe v22 SDK carries natively (v16 pinned 2024-06-20 and was rejected).
+stripe.apiVersion = '2025-03-31.basil';
 
 const app = express();
 app.set('trust proxy', 1);
