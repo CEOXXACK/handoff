@@ -825,7 +825,7 @@ let licTimer = null;
 async function licRefresh() {
   if (!hasLicense()) return;
   try {
-    const r = await fetch(api('/license/refresh'), { headers: { Authorization: 'Bearer ' + licToken() } });
+    const r = await fetch(api('/api/license/refresh'), { headers: { Authorization: 'Bearer ' + licToken() } });
     if (r.ok) {
       const d = await r.json();
       if (d.license) { licVal = d; localStorage.setItem(LS_LIC, JSON.stringify(d)); state.plan = 'pro'; }
