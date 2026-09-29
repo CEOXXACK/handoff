@@ -1,0 +1,4 @@
+# Netlify build artifacts
+config.js.bak
+# local
+node_modules/

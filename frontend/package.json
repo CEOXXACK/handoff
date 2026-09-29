@@ -1,0 +1,10 @@
+{
+  "name": "handoff-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Handoff platform frontend (static single-file app)",
+  "scripts": {
+    "build": "node inject-config.js"
+  },
+  "devDependencies": {}
+}

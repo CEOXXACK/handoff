@@ -1,0 +1,304 @@
+﻿<!DOCTYPE html>
+<html lang='en' data-theme='dark'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Handoff — send client work in one link</title>
+  <meta name='theme-color' content='#171410'>
+  <meta name='description' content='Handoff packs your client delivery — deliverables, approvals and payment — into a single self-contained link. No accounts, no uploads.'>
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="5" y="5" width="22" height="22" fill="none" stroke="%23221D14" stroke-width="2.5" transform="rotate(-6 16 16)"/><text x="16" y="21.5" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle" fill="%23221D14" transform="rotate(-6 16 16)">H</text></svg>'>
+  <style>
+    :root {
+      --paper: #F5F1E8;
+      --paper2: #EDE7D8;
+      --card: #FBF8F0;
+      --ink: #221D14;
+      --ink2: #5A5342;
+      --ink3: #8B8268;
+      --line: #DCD4C0;
+      --line2: #C9BFA6;
+      --green: #1E5B40;
+      --green-soft: #8FB89C;
+      --amber: #96690F;
+      --verm: #B23A1D;
+    }
+    [data-theme='light'] {
+      --paper: #f7f4ee;
+      --paper2: #eee9dd;
+      --card: #fffdf8;
+      --ink: #201b14;
+      --ink2: #5c5649;
+      --ink3: #807a69;
+      --line: #d9d0bc;
+      --line2: #c5b79a;
+      --green: #1f5e44;
+      --green-soft: #82b194;
+      --amber: #a76f1e;
+      --verm: #bf3d2d;
+    }
+    body {
+      margin: 0;
+      font-family: Georgia, 'Times New Roman', serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.65;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    * { box-sizing: border-box; }
+    a { color: inherit; text-decoration: none; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .top { position: sticky; top: 0; background: rgba(245,241,232,0.9); border-bottom: 1px solid var(--line); }
+    .top-in { display: flex; align-items: center; gap: 20px; padding: 16px 0; }
+    .wordmark { display: inline-flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 600; }
+    .wm-mark { width: 26px; height: 26px; display: grid; place-items: center; border: 2px solid var(--ink); transform: rotate(-7deg); font: 700 12px monospace; }
+    .top-nav { margin-left: auto; display: flex; gap: 15px; flex-wrap: wrap; }
+    .nav-a { font: 600 11px monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 13px 20px; border-radius: 2px; border: 1px solid var(--ink);
+      background: var(--ink); color: var(--paper); font: 600 11.5px monospace;
+      letter-spacing: 0.13em; text-transform: uppercase; cursor: pointer;
+      box-shadow: 3px 3px 0 rgba(34,29,20,0.22);
+    }
+    .btn-green { background: var(--green); border-color: var(--green); }
+    .btn-line { background: transparent; color: var(--ink); box-shadow: none; }
+    .hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center; padding: 86px 0 72px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; color: var(--ink2); font: 600 11px monospace; letter-spacing: 0.16em; text-transform: uppercase; }
+    .eyebrow::before { content: ''; width: 9px; height: 9px; background: var(--verm); border-radius: 50%; display: inline-block; }
+    h1 { margin: 0 0 24px; font-size: clamp(42px, 6vw, 80px); line-height: 1.02; letter-spacing: -0.02em; }
+    h1 em { color: var(--green); font-style: italic; }
+    .lede { font-size: 19px; color: var(--ink2); max-width: 32em; }
+    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; margin: 32px 0 20px; }
+    .sheet {
+      background: var(--card); border: 1px solid var(--line2); border-radius: 3px;
+      box-shadow: 0 26px 62px -36px rgba(0,0,0,0.6); padding: 0 26px 26px;
+    }
+    .rule2 { height: 8px; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); margin: 0 -26px; }
+    .sheet-top { display: flex; align-items: center; gap: 18px; padding: 16px 0 28px; }
+    .mono-mark { width: 46px; height: 46px; display: grid; place-items: center; background: var(--paper2); border: 1px solid var(--line2); border-radius: 2px; font: 700 20px monospace; transform: rotate(-5deg); }
+    .sheet-biz { font-size: 30px; font-weight: 600; }
+    .sheet-project { font-size: clamp(30px, 4.5vw, 44px); font-weight: 540; letter-spacing: -0.02em; line-height: 1.08; margin-top: 24px; }
+    .sheet-msg { margin-top: 18px; padding-left: 18px; border-left: 2px solid var(--green); color: var(--ink2); font-size: 17px; }
+    .meta-row { display: flex; align-items: baseline; gap: 12px; padding: 6px 0; font: 500 11px monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink2); }
+    .meta-row .lead { flex: 1; border-bottom: 1px dotted var(--line2); transform: translateY(-3px); }
+    .meta-row b { color: var(--ink); }
+    .d-head { display: flex; justify-content: space-between; margin-top: 40px; padding-bottom: 10px; border-bottom: 2px solid var(--ink); font: 600 11px monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3); }
+    .d-list { list-style: none; padding: 0; margin: 0; }
+    .d-item { display: grid; grid-template-columns: 46px 1fr auto; gap: 20px; align-items: center; padding: 22px 0; border-bottom: 1px solid var(--line); }
+    .d-idx { font: 600 12px monospace; color: var(--ink3); }
+    .d-title { font-size: 21px; font-weight: 560; letter-spacing: -0.01em; }
+    .d-note { margin-top: 3px; color: var(--ink2); font-size: 14.5px; }
+    .chip { display: inline-flex; align-items: center; gap: 8px; padding: 5px 10px; border: 1px solid var(--line2); border-radius: 2px; font: 600 9.5px monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); }
+    .chip::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--ink3); }
+    .chip.ok { color: var(--green); border-color: rgba(91,156,122,0.5); }
+    .chip.ok::before { background: var(--green); }
+    .chip.ready { color: var(--amber); border-color: rgba(214,160,74,0.5); }
+    .chip.ready::before { background: var(--amber); }
+    .sect { border-top: 1px solid var(--line); padding: 76px 0; }
+    .sec-label { display: flex; align-items: center; gap: 16px; margin-bottom: 34px; color: var(--ink2); font: 600 11px monospace; letter-spacing: 0.14em; text-transform: uppercase; }
+    .sec-label::after { content: ''; flex: 1; border-top: 1px solid var(--line2); }
+    .step { display: grid; grid-template-columns: 150px 1fr; gap: 34px; padding: 42px 0; border-top: 1px solid var(--line); }
+    .step:first-child { border-top: 0; }
+    .step-idx { font-family: Georgia, serif; font-size: 62px; line-height: 0.9; color: var(--ink3); }
+    .step h3 { margin: 0 0 10px; font-size: 27px; letter-spacing: -0.01em; }
+    .step p { margin: 0; color: var(--ink2); max-width: 56ch; }
+    .price-grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 64px; align-items: start; }
+    .tiers { display: grid; grid-template-columns: 1fr 1.18fr; gap: 20px; }
+    .tier { background: var(--card); border: 1px solid var(--ink); border-radius: 3px; padding: 30px 28px; display: flex; flex-direction: column; }
+    .tier-pro { background: var(--ink); color: var(--paper); box-shadow: 7px 7px 0 var(--verm); }
+    .ptag { display: inline-block; align-self: flex-start; background: var(--verm); color: var(--paper); padding: 5px 10px; font: 700 10px monospace; letter-spacing: 0.16em; text-transform: uppercase; border-radius: 2px; }
+    .t-price { font-size: 46px; font-weight: 560; letter-spacing: -0.02em; margin: 14px 0 4px; }
+    .t-price span { font: 500 12px monospace; letter-spacing: 0.1em; opacity: 0.6; }
+    .t-list { list-style: none; margin: 22px 0 28px; padding: 0; flex: 1; }
+    .t-list li { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-top: 1px dotted var(--line2); }
+    .faq details { border-top: 1px solid var(--line); padding: 20px 0; }
+    .faq summary { cursor: pointer; font-size: 21px; font-weight: 560; list-style: none; }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq p { color: var(--ink2); margin-top: 12px; }
+    .band { background: var(--ink); color: var(--paper); margin-top: 76px; }
+    .band-in { display: flex; flex-direction: column; align-items: flex-start; gap: 32px; padding: 92px 0; }
+    .band h2 { margin: 0; font-size: clamp(34px, 5vw, 64px); line-height: 1.04; letter-spacing: -0.02em; }
+    .band h2 em { color: var(--green-soft); font-style: italic; }
+    footer { background: var(--ink); color: var(--paper); border-top: 1px solid rgba(245,241,232,0.12); }
+    .foot-in { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; padding: 26px 0; }
+    .mono-label { font: 600 10.5px monospace; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink2); }
+    .foot-in .mono-label { color: rgba(245,241,232,0.6); }
+    @media (max-width: 980px) { .hero { grid-template-columns: 1fr; padding-top: 60px; } .price-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 860px) { .step { grid-template-columns: 56px 1fr; gap: 20px; } .step-idx { font-size: 40px; } .tiers { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .wrap { padding: 0 18px; } .top-nav { gap: 10px; } }
+  </style>
+</head>
+<body>
+  <header class='top'>
+    <div class='wrap top-in'>
+      <div class='wordmark'><span class='wm-mark'>H</span>Handoff</div>
+      <nav class='top-nav' aria-label='Main navigation'>
+        <a href='#process' class='nav-a'>Process</a>
+        <a href='#pricing' class='nav-a'>Pricing</a>
+        <a href='#faq' class='nav-a'>FAQ</a>
+      </nav>
+      <button class='btn btn-line' id='themeToggle' type='button'>Dark mode</button>
+    </div>
+  </header>
+
+  <main>
+    <section class='wrap hero'>
+      <div>
+        <div class='eyebrow'>Built for client clarity</div>
+        <h1>Turn project handoff into a <em>clean finish</em>.</h1>
+        <p class='lede'>Handoff keeps every delivery, approval, and milestone in one shared place so teams can ship with fewer surprises and faster signoff.</p>
+        <div class='hero-cta'>
+          <a class='btn btn-green' href='/handoff/#/new'>Open the app</a>
+          <a class='btn btn-line' href='#process'>How it works</a>
+        </div>
+      </div>
+      <div class='specimen'>
+        <div class='sheet'>
+          <div class='rule2'></div>
+          <div class='sheet-top'>
+            <div class='sheet-head'>
+              <div class='mono-mark'>H</div>
+              <div class='sheet-biz'>Handoff</div>
+            </div>
+          </div>
+          <div class='sheet-project'>Quarterly brand refresh</div>
+          <div class='sheet-msg'>Final assets are ready for review. Approved files include logo lockups, campaign decks, and launch notes.</div>
+          <div class='sheet-meta'>
+            <div class='meta-row'><span>Client</span><span class='lead'></span><b>Northlane Studio</b></div>
+            <div class='meta-row'><span>Project</span><span class='lead'></span><b>Brand spring 2026</b></div>
+            <div class='meta-row'><span>Due</span><span class='lead'></span><b>Mar 18</b></div>
+          </div>
+          <div class='d-head'><span>Deliverables</span><span>Ready</span></div>
+          <ul class='d-list'>
+            <li class='d-item'>
+              <div class='d-idx'>01</div>
+              <div>
+                <div class='d-title'>Identity suite</div>
+                <div class='d-note'>Primary marks, alt lockups, favicon export</div>
+              </div>
+              <div class='d-side'><span class='chip ok'>Approved</span></div>
+            </li>
+            <li class='d-item'>
+              <div class='d-idx'>02</div>
+              <div>
+                <div class='d-title'>Launch deck</div>
+                <div class='d-note'>Final story arc, visual references, rollout notes</div>
+              </div>
+              <div class='d-side'><span class='chip ready'>Reviewing</span></div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class='wrap sect' id='process'>
+      <div class='sec-label'>How it works</div>
+      <div class='step'>
+        <div class='step-idx'>01</div>
+        <div>
+          <h3>Package the work</h3>
+          <p>Drop in the final files, notes, and timeline so every delivery has a clear and tidy destination.</p>
+        </div>
+      </div>
+      <div class='step'>
+        <div class='step-idx'>02</div>
+        <div>
+          <h3>Share a single handoff</h3>
+          <p>Send a polished summary with client-ready status, links, and approvals in one smart page.</p>
+        </div>
+      </div>
+      <div class='step'>
+        <div class='step-idx'>03</div>
+        <div>
+          <h3>Track the finish</h3>
+          <p>See what is approved, what is still open, and what needs follow-up without tracking across chats and email.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class='wrap sect' id='pricing'>
+      <div class='sec-label'>Plans</div>
+      <div class='price-grid'>
+        <div>
+          <h2>Simple pricing for small creative teams.</h2>
+          <p class='lede'>Choose a plan that fits your studio rhythm and scale up when the project list grows.</p>
+        </div>
+        <div class='tiers'>
+          <div class='tier'>
+            <span class='ptag'>Free</span>
+            <div class='t-price'>$0 <span>/ forever</span></div>
+            <ul class='t-list'>
+              <li>Project handoff pages</li>
+              <li>Client delivery notes</li>
+              <li>Basic asset summaries</li>
+            </ul>
+            <a class='btn btn-line' href='/handoff/#/new'>Start free</a>
+          </div>
+          <div class='tier tier-pro'>
+            <span class='ptag'>Pro</span>
+            <div class='t-price'>$15 <span>/ month</span></div>
+            <ul class='t-list'>
+              <li>Unlimited project rooms &amp; deliverables</li>
+              <li>Remove the Handoff mark</li>
+              <li>Any brand color</li>
+            </ul>
+            <a class='btn btn-green' href='/handoff/' target='_blank' rel='noopener'>Upgrade — $15/mo</a>
+          </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class='wrap sect faq' id='faq'>
+      <div class='sec-label'>FAQ</div>
+      <details open>
+        <summary>What is Handoff used for?</summary>
+        <p>It gives teams a clean, shared place to package final work, track approvals, and guide clients through the last mile of delivery.</p>
+      </details>
+      <details>
+        <summary>Can I customize the page?</summary>
+        <p>Yes. You can swap the text, add your brand colors, and adapt the project structure to match your studio workflow.</p>
+      </details>
+      <details>
+        <summary>Does it work for small teams?</summary>
+        <p>It is designed to be lightweight and easy to adopt, especially for studios that want structure without heavy process overhead.</p>
+      </details>
+    </section>
+
+    <section class='band'>
+      <div class='wrap band-in'>
+        <h2>Ready to ship a <em>clearer finish</em>?</h2>
+        <a class='btn btn-green' href='/handoff/#/new'>Start with Handoff</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class='wrap foot-in'>
+      <div class='mono-label'>Handoff</div>
+      <div class='mono-label'>Project clarity for creative teams</div>
+      <div class='mono-label'>© 2026</div>
+    </div>
+  </footer>
+
+  <script>
+    const root = document.documentElement;
+    const THEME_KEY = 'handoff.theme.v1';
+    function applyTheme(theme) {
+      const value = theme === 'light' ? 'light' : 'dark';
+      root.setAttribute('data-theme', value);
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', value === 'dark' ? '#171410' : '#F5F1E8');
+      const button = document.getElementById('themeToggle');
+      if (button) button.textContent = value === 'dark' ? 'Light mode' : 'Dark mode';
+    }
+    const saved = localStorage.getItem(THEME_KEY) || 'dark';
+    applyTheme(saved);
+    document.getElementById('themeToggle')?.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      localStorage.setItem(THEME_KEY, next);
+      applyTheme(next);
+    });
+  </script>
+</body>
+</html>

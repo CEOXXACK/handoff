@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">                                                                          <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handoff — send client work in one link</title>                                     <meta name="description" content="Handoff packs your client delivery — deliverables,
+approvals and payment — into a single self-contained link. No accounts, no                uploads.">
+<meta name="theme-color" content="#F5F1E8">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"
+viewBox="0 0 32 32"><rect x="5" y="5" width="22" height="22" fill="none"
+stroke="%23221D14" stroke-width="2.5" transform="rotate(-6 16 16)"/><text x="16"          y="21.5" font-family="monospace" font-size="12" font-weight="bold"
+text-anchor="middle" fill="%23221D14" transform="rotate(-6 16 16)">H</text></svg>'>
+<link rel="preconnect" href="https://fonts.googleapis.com">                               <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link                                                                                     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144300..700;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"                        rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}                                               :root{
+  --paper:#F5F1E8; --paper2:#EDE7D8; --card:#FBF8F0;
+  --ink:#221D14; --ink2:#5A5342; --ink3:#8B8268;
+  --line:#DCD4C0; --line2:#C9BFA6;                                                          --green:#1E5B40; --amber:#96690F; --verm:#B23A1D;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --serif:'Fraunces',Georgia,serif;
+}                                                                                         html{scroll-behavior:smooth}
+body{background-color:var(--paper);color:var(--ink);font:400 17px/1.65                    var(--serif);font-optical-sizing:auto;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(rgba(34,29,20,.05) 1px,transparent
+1.2px);background-size:26px 26px}
+::selection{background:var(--ink);color:var(--paper)}                                     a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}                input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:2px}         .wrap{max-width:1140px;margin:0 auto;padding:0 28px}
+.mono-label{font:600 10.5px                                                               var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink2)}
+.mono{font-family:var(--mono)}
+.fine{font:500 10.5px                                                                     var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.display{font-weight:520;font-size:clamp(42px,6.2vw,84px);line-height:1.02;letter-spa.display{font-weight:520;font-size:clamp(42px,6.2vw,84px);line-height:1.02;letter-spacing:-.02em}
+.display em{font-style:italic;color:var(--green)}
+.display-2{font-weight:540;font-size:clamp(30px,4.2vw,50px);line-height:1.06;letter-s.display-2{font-weight:540;font-size:clamp(30px,4.2vw,50px);line-height:1.06;letter-spacing:-.02em}                                                                                      .lede{font-size:19px;line-height:1.6;color:var(--ink2);max-width:32em}
+.lede-sm{color:var(--ink2);max-width:46em}                                                code{font:600 11px var(--mono);background:var(--paper2);padding:2px
+6px;border-radius:2px;word-break:break-all}
+/* buttons & controls */                                                                  .btn{display:inline-flex;align-items:center;gap:9px;padding:13px
+20px;background:var(--ink);color:var(--paper);border:1px solid                            var(--ink);border-radius:2px;
+  font:600 11.5px                                                                         var(--mono);letter-spacing:.13em;text-transform:uppercase;cursor:pointer;white-space:nowrap;user-select:none;text-decoration:none;
+  box-shadow:3px 3px 0 rgba(34,29,20,.22);transition:transform .16s ease,box-shadow
+.16s ease}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 rgba(34,29,20,.3)}         .btn:active{transform:translate(2px,2px);box-shadow:none}
+.btn-green{background:var(--green);border-color:var(--green)}                             .btn-line{background:transparent;color:var(--ink);box-shadow:none}
+.btn-line:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0                       rgba(34,29,20,.2)}
+.btn-ghost{background:transparent;color:var(--ink2);border-color:transparent;box-shad.btn-ghost{background:transparent;color:var(--ink2);border-color:transparent;box-shadow:none}  .btn-ghost:hover{color:var(--ink);border-color:var(--line2);transform:none;box-shadow.btn-ghost:hover{color:var(--ink);border-color:var(--line2);transform:none;box-shadow:none}    .btn.sm{padding:8px 13px;font-size:10.5px;gap:7px}
+.btn.wide{width:100%;justify-content:center}
+.btn svg{width:14px;height:14px}
+.tlink{font:600 11px
+var(--mono);letter-spacing:.1em;text-transform:uppercase;text-decoration:underline;tevar(--mono);letter-spacing:.1em;text-transform:uppercase;text-deoration:underline;text-underline-offset:3px;color:var(--green)}
+.ibtn{width:34px;height:34px;display:inline-grid;place-items:center;border:1px solid      transparent;border-radius:2px;color:var(--ink2);transition:.15s}
+.ibtn:hover{border-color:var(--line2);color:var(--ink);background:var(--card)}
+.ibtn.danger:hover{color:var(--verm);border-color:rgba(178,58,29,.45)}                    .ibtn svg{width:15px;height:15px}
+.chip{display:inline-flex;align-items:center;gap:8px;font:600 9.5px                       var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:5px
+10px;border:1px solid                                                                     var(--line2);border-radius:2px;color:var(--ink2);white-space:nowrap}
+.chip::before{content:'';width:7px;height:7px;background:var(--ink3);flex:none}           .chip.ready{color:var(--amber);border-color:rgba(150,105,15,.45)}
+.chip.ready::before{background:var(--amber)}                                              .chip.ok{color:var(--green);border-color:rgba(30,91,64,.4)}
+.chip.ok::before{background:var(--green)}                                                 .chip.wip{color:var(--ink3)}
+/* topbar */
+.top{position:sticky;top:0;z-index:40;background:rgba(245,241,232,.9);backdrop-filter.top{position:sticky;top:0;z-index:40;background:rgba(245,241,232,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;gap:18px;padding-top:14px;padding-bottom:14px.top-in{display:flex;align-items:center;gap:18px;padding-top:14px;padding-bottom:14px}
+.wordmark{display:inline-flex;align-items:center;gap:11px;font:600 21px                   var(--serif);letter-spacing:-.01em}
+.wm-mark{width:25px;height:25px;border:2px solid                                          var(--ink);display:grid;place-items:center;font:700 12px
+var(--mono);transform:rotate(-7deg);transition:transform .3s
+cubic-bezier(.3,1.6,.4,1)}
+.wordmark:hover .wm-mark{transform:rotate(4deg) scale(1.07)}
+.top-nav{margin-left:auto;display:flex;align-items:center;gap:22px}
+.nav-a{font:600 11px                                                                      var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);padding:4px 0;border-bottom:1px solid transparent}
+.nav-a:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.nav-a.pro{color:var(--verm)}
+.plan-chip{border:1px solid var(--line2);border-radius:2px;padding:5px
+10px;color:var(--ink2);white-space:nowrap}                                                @media(max-width:900px){.top-tag{display:none}.top-nav{gap:14px}}
+/* landing */                                                                             .hero{display:grid;grid-template-columns:1.08fr
+.92fr;gap:56px;align-items:center;padding-top:88px;padding-bottom:74px}                   .eyebrow{display:inline-flex;align-items:center;gap:10px;margin-bottom:26px}
+.eyebrow::before{content:'';width:9px;height:9px;background:var(--verm)}
+.hero h1{margin-bottom:24px}                                                              .hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin:32px 0 20px}
+.specimen{min-width:0}
+.spec-box{height:520px;overflow:hidden;-webkit-mask-image:linear-gradient(#000            80%,transparent);mask-image:linear-gradient(#000 80%,transparent)}
+.spec-scale{width:640px;transform:scale(.62) rotate(-1.6deg);transform-origin:top         left}
+.spec-cap{margin-top:14px;color:var(--ink3);display:flex;align-items:center;gap:14px;.spec-cap{margin-top:14px;color:var(--ink3);display:flex;align-items:center;gap:14px;text-align:center}
+.spec-cap::before,.spec-cap::after{content:'';flex:1;border-top:1px dotted                var(--line2)}
+@media(max-width:980px){.hero{grid-template-columns:1fr;padding-top:60px;padding-bott@media(max-width:980px){.hero{grid-template-columns:1fr;padding-top:60px;padding-bottom:52px}.specimen{display:none}}
+.sect{border-top:1px solid var(--line);padding-top:76px;padding-bottom:76px}              .sec-label{display:flex;align-items:center;gap:16px;margin-bottom:40px}
+.sec-label::after{content:'';flex:1;border-top:1px solid var(--line2)}                    .step{display:grid;grid-template-columns:150px 1fr;gap:34px;padding:42px
+0;border-top:1px solid var(--line)}                                                       .steps .step:first-child{border-top:0;padding-top:4px}
+.step-idx{font-weight:330;font-size:62px;line-height:.9;color:var(--ink3)}                .step h3{font-size:27px;font-weight:560;letter-spacing:-.01em;margin-bottom:10px}
+.step p{color:var(--ink2);max-width:56ch}                                                 .steps .step:nth-child(2){padding-left:7%}
+.steps .step:nth-child(3){padding-left:14%}                                               .feat{display:grid;grid-template-columns:1.05fr
+1fr;gap:40px;align-items:baseline;padding:26px 0;border-top:1px solid var(--line)}        .feat-l{display:flex;gap:18px;align-items:baseline}
+.feat-idx{font:600 11px var(--mono);letter-spacing:.1em;color:var(--ink3)}
+.feat h3{font-size:21.5px;font-weight:580;letter-spacing:-.01em}
+.feat p{color:var(--ink2);font-size:16px}                                                 .price-grid{display:grid;grid-template-columns:.85fr
+1.15fr;gap:64px;align-items:start}
+.tiers{display:grid;grid-template-columns:1fr 1.18fr;gap:20px;align-items:stretch}
+.tier{border:1px solid
+var(--ink);border-radius:3px;background:var(--card);padding:30px
+28px;display:flex;flex-direction:column}
+.tier-pro{background:var(--ink);color:var(--paper);box-shadow:7px 7px 0 var(--verm)}      .ptag{display:inline-block;background:var(--verm);color:var(--paper);font:700 10px
+var(--mono);letter-spacing:.16em;text-transform:uppercase;padding:5px                     10px;border-radius:2px;align-self:flex-start}
+.t-price{font-size:46px;font-weight:560;letter-spacing:-.02em;margin:14px 0 4px}          .t-price span{font:500 12px var(--mono);letter-spacing:.1em;opacity:.6}
+.t-list{list-style:none;margin:22px 0 28px;flex:1}                                        .t-list li{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-top:1px
+dotted var(--line2);font-size:15.5px}                                                     .t-list svg{width:15px;height:15px;color:var(--green);flex:none;margin-top:4px}
+.tier-pro .t-list li{border-top-color:rgba(245,241,232,.22)}                              .tier-pro .t-list svg{color:#8FB89C}
+.faq details{border-top:1px solid var(--line);padding:20px 0}                             .faq
+summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:20px;align-items:baseline;font-size:21px;font-weight:560;letter-spacing:-.01em}                     .faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'+';font:400 22px                                             var(--mono);color:var(--ink3);transition:transform .2s}
+.faq details[open] summary::after{transform:rotate(45deg)}                                .faq p{color:var(--ink2);margin-top:12px;max-width:62ch}
+.band{background:var(--ink);color:var(--paper);margin-top:76px}                           .band-in{display:flex;flex-direction:column;align-items:flex-start;gap:32px;padding-t.band-in{display:flex;flex-direction:column;align-items:flex-start;gap:32px;padding-top:92px;padding-bottom:92px}
+.band .display{font-size:clamp(34px,5vw,64px)}                                            .band .display em{color:#9CC3A8}
+.band .btn-green{box-shadow:4px 4px 0 rgba(245,241,232,.18)}                              .foot{border-top:1px solid
+rgba(245,241,232,.2);background:var(--ink);color:var(--paper)}                            .foot-in{display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding-top:26px;pad.foot-in{display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding-top:26px;padding-bottom:26px}
+.foot-in .mono-label{color:rgba(245,241,232,.6)}
+.foot-in .mono-label:last-child{margin-left:auto}
+@media(max-width:1020px){.price-grid{grid-template-columns:1fr;gap:44px}}                 @media(max-width:980px){.hero{grid-template-columns:1fr}.specimen{display:none}}
+@media(max-width:860px){.step{grid-template-columns:56px
+1fr;padding-left:0!important;gap:20px}.step-idx{font-size:40px}.feat{grid-template-co1fr;padding-left:0!importantgap:20px}.step-idx{font-size:40px}.feat{grid-template-columns:1fr;gap:8px}}
+/* studio */                                                                              .studio{padding-top:52px;padding-bottom:90px}
+.s-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;marg.s-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:26px;flex-wrap:wrap}                                                                      .p-list{border-top:2px solid var(--ink)}
+.p-row{display:grid;grid-template-columns:118px 1fr 128px 118px                           auto;gap:18px;align-items:center;padding:20px 6px;border-bottom:1px solid
+var(--line);transition:background .15s}                                                   .p-row:hover{background:var(--card)}
+.p-row.is-arch{opacity:.55}
+.p-no{font:600 11.5px var(--mono);letter-spacing:.08em;color:var(--ink3)}
+.p-title{font-size:19px;font-weight:580;letter-spacing:-.01em;line-height:1.25}
+.p-sub{color:var(--ink2);font-size:13.5px;margin-top:2px}
+.p-date{font:500 10.5px                                                                   var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.p-acts{display:flex;gap:4px;justify-content:flex-end}
+.empty{padding:64px 0 20px}
+.tpls{margin:34px 0 26px;border-top:2px solid var(--ink)}
+.tpl{display:grid;grid-template-columns:118px 1fr                                         auto;gap:18px;align-items:center;width:100%;text-align:left;padding:20px
+6px;border-bottom:1px solid var(--line);transition:background .15s}
+.tpl:hover{background:var(--card)}
+.tpl .mono-label{color:var(--ink3)}
+.tpl b{font-size:20px;font-weight:580;letter-spacing:-.01em}                              .tpl .dsc{color:var(--ink2);font-size:14px}
+@media(max-width:860px){.p-row{grid-template-columns:1fr
+auto;row-gap:8px}.p-no,.p-date{display:none}.tpl{grid-template-columns:1fr;gap:6px}}
+/* builder */                                                                             .builder{max-width:1240px;margin:0 auto;padding:44px 28px
+90px;display:grid;grid-template-columns:minmax(0,1fr)                                     minmax(0,440px);gap:44px;align-items:start}
+.form-pane{min-width:0}                                                                   .preview-pane{position:sticky;top:84px;max-height:calc(100vh -
+108px);overflow:auto;border:1px solid                                                     var(--line2);border-radius:3px;background:var(--paper2);padding:18px}
+.preview-pane .sheet{max-width:none;box-shadow:0 24px 60px -34px                          rgba(34,29,20,.45);padding:0 26px 26px}
+.preview-pane .rule2{margin:0 -26px}                                                      .pv-cap{display:flex;justify-content:space-between;gap:10px;margin:0 4px 14px}
+.m-toggle{display:none;gap:8px;margin-bottom:22px}                                        .b-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;marg.b-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.fsec{display:flex;align-items:center;gap:16px;border-top:2px solid                       var(--ink);padding-top:14px;margin:38px 0 20px}
+.f-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}                            .f-grid.three{grid-template-columns:1fr 1fr 1fr}
+.field{margin-bottom:18px;min-width:0}                                                    .field label{display:block;margin-bottom:4px}
+.field input,.field textarea,.field                                                       select{width:100%;background:transparent;border:0;border-bottom:1px solid
+var(--line2);border-radius:0;padding:7px 2px;font-size:17px}                              .field input:focus,.field textarea:focus,.field
+select:focus{outline:none;border-bottom:2px solid var(--green);margin-bottom:-1px}        .field textarea{resize:vertical;min-height:76px;line-height:1.55}
+.field.bad input{border-bottom-color:var(--verm)}                                         input[type=color]{width:36px;height:32px;padding:1px;border:1px solid
+var(--line2);border-radius:2px;background:var(--card);cursor:pointer}                     .swatches{display:flex;gap:10px;align-items:center;padding-top:8px;flex-wrap:wrap}        .sw{width:28px;height:28px;border-radius:2px;background:var(--c);border:1px solid         rgba(34,29,20,.25);transition:transform .15s}
+.sw:hover{transform:scale(1.14)}                                                          .sw.on{outline:2px solid var(--ink);outline-offset:2px}
+.sw-custom{display:inline-grid;place-items:center;background:var(--card);border:1px       dashed var(--line2);color:var(--ink2)}
+.sw-custom svg{width:13px;height:13px}
+.d-row{display:grid;grid-template-columns:28px minmax(160px,1.25fr)
+minmax(130px,1fr) 136px 32px;gap:12px;align-items:end;padding:12px 0;border-top:1px
+dotted var(--line)}                                                                       .d-row .d-n{font:600 11px var(--mono);color:var(--ink3);padding-bottom:11px}
+.d-main-c{display:flex;flex-direction:column;gap:2px;min-width:0}
+.d-main-c                                                                                 input,.d-row>input,.d-row>select{background:transparent;border:0;border-bottom:1px
+solid var(--line2);border-radius:0;padding:7px 2px;min-width:0}                           .d-main-c .thin{font-size:13.5px;color:var(--ink2)}
+.d-row input:focus,.d-row                                                                 select:focus{outline:none;border-bottom-color:var(--green)}
+.d-row                                                                                    .ibtn{margin-bottom:3px}
+.ferr{color:var(--verm);font:500 11px                                                     var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-top:8px}
+.limit-note{color:var(--verm);font:500 11.5px
+var(--mono);letter-spacing:.06em;margin:10px 0}
+.m-note-banner{border:1px solid
+var(--verm);border-left-width:4px;border-radius:2px;padding:12px
+16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:24px;color16px;display:flex;ga:14px;align-items:center;flex-wrap:wrap;margin-bottom:24px;color:var(--ink2)}
+.save-bar{display:flex;gap:14px;justify-content:flex-end;margin-top:40px;padding-top:.save-bar{display:flex;gap:14px;justify-content:flex-end;margin-top:40px;padding-top:22px;border-top:2px solid var(--ink)}
+@keyframes
+shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:trshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{tansform:translateX(4px)}}
+.shake{animation:shake .3s ease}                                                          @media(max-width:1020px){
+  .builder{grid-template-columns:1fr}                                                       .m-toggle{display:flex}
+  .preview-pane{display:none;position:static;max-height:none}
+  .preview-pane.on{display:block}                                                           .form-pane.off{display:none}
+}                                                                                         @media(max-width:760px){.f-grid,.f-grid.three{grid-template-columns:1fr;gap:0}
+  .d-row{grid-template-columns:1fr 32px;row-gap:8px}                                        .d-row .d-n{display:none}
+  .d-row>*{grid-column:1}                                                                   .d-row .ibtn{grid-column:2;grid-row:1}
+}                                                                                         /* portal sheet */
+.portal-bg{min-height:100vh;padding:46px 20px 90px}                                       .portal-tools{max-width:780px;margin:0 auto
+18px;display:flex;justify-content:flex-end}                                               .sheet{max-width:780px;margin:0 auto;background:var(--card);border:1px solid
+var(--line2);border-radius:3px;box-shadow:0 34px 80px -42px                               rgba(34,29,20,.5);padding:0 46px 36px}
+.rule2{height:8px;border-top:2.5px solid var(--ink);border-bottom:1px solid               var(--ink);margin:0 -46px}
+.sheet-top{display:flex;justify-content:space-between;gap:14px;padding:12px 0 30px}       .sheet-head{display:flex;gap:18px;align-items:center}
+.mono-mark{width:46px;height:46px;display:grid;place-items:center;font:700 20px           var(--mono);transform:rotate(-5deg);border-radius:2px;flex:none}
+.sheet-biz{font-size:30px;font-weight:600;letter-spacing:-.01em;line-height:1.1}          .sheet-for{margin-top:3px}
+.sheet-for b{letter-spacing:.12em;font-weight:700}                                        .sheet-project{font-size:clamp(30px,4.6vw,44px);font-weight:540;letter-spacing:-.02em.sheet-project{font-size:clamp(30px,4.6vw,44px);font-weight:540;letter-spacing:-.02em;line-height:1.06;margin-top:30px}
+.sheet-msg{margin-top:18px;padding-left:18px;border-left:2px solid                        var(--brand,#1E5B40);color:var(--ink2);font-size:17.5px;max-width:62ch}
+.sheet-meta{margin-top:30px;max-width:520px}                                              .meta-row{display:flex;align-items:baseline;gap:10px;padding:5px 0;font:500 11px
+var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}              .meta-row .lead{flex:1;border-bottom:1px dotted
+var(--line2);transform:translateY(-3px)}
+.meta-row b{color:var(--ink);font-weight:600}
+.d-head{margin-top:44px;display:flex;justify-content:space-between;align-items:baseli.d-head{margin-top:44px;display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:10px}                                 .dlist{list-style:none}
+.d-item{display:grid;grid-template-columns:46px 1fr                                       minmax(215px,auto);gap:20px;align-items:center;padding:22px 0;border-bottom:1px
+solid var(--line);break-inside:avoid}                                                     .d-idx{font:600 12px var(--mono);letter-spacing:.1em;color:var(--ink3)}
+.d-title{font-size:21px;font-weight:560;letter-spacing:-.01em;line-height:1.25}           .d-note{color:var(--ink2);font-size:14.5px;margin-top:3px}
+.d-item.is-ok .d-title{color:var(--ink2)}
+@keyframes rowSettle{0%{background:rgba(30,91,64,.07)}100%{background:transparent}}
+.d-item.is-ok{animation:rowSettle .6s ease}
+.d-side{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.d-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-e.d-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.major-slot{display:flex;justify-content:center;padding:36px 0 4px;min-height:0}
+.stamp{--si:var(--brand,#1E5B40);position:relative;display:inline-flex;flex-direction.stamp{--si:var(--brand,#1E5B40);position:relative;display:inline-flex;flex-direction:column;align-items:center;gap:1px;padding:9px 16px;border:2.5px solid                              var(--si);border-radius:5px;color:var(--si);transform:rotate(-5deg);mix-blend-mode:muvar(--si);borde-radius:5px;color:var(--si);transform:rotate(-5deg);mix-blend-mode:multiply}
+.stamp::after{content:'';position:absolute;inset:3px;border:1px solid
+var(--si);border-radius:3px}
+.stamp b{font:700 14px                                                                    var(--mono);letter-spacing:.24em;text-transform:uppercase;padding-left:.24em}
+.stamp i{font:600 8.5px                                                                   var(--mono);font-style:normal;letter-spacing:.2em;opacity:.85;padding-left:.2em}
+.stamp.major{padding:12px 26px;transform:rotate(-7deg)}                                   .stamp.major b{font-size:30px}
+.stamp.anim{animation:stampIn .5s cubic-bezier(.25,1.5,.35,1) both}                       .stamp.major.anim{animation-name:majorIn}
+@keyframes stampIn{0%{transform:scale(2.6)                                                rotate(-20deg);opacity:0}55%{transform:scale(.9)
+rotate(-4deg);opacity:1}78%{transform:scale(1.07)                                         rotate(-6deg)}100%{transform:rotate(-5deg) scale(1);opacity:1}}
+@keyframes majorIn{0%{transform:scale(3)                                                  rotate(-24deg);opacity:0}55%{transform:scale(.92)
+rotate(-6deg);opacity:1}78%{transform:scale(1.08)
+rotate(-8deg)}100%{transform:rotate(-7deg) scale(1);opacity:1}}
+@keyframes
+thunk{0%{transform:translateY(0)}30%{transform:translateY(3px)}65%{transform:translatthunk{0%{transform:translateY(0)}30%{transform:translateY(3px)}65%{transfom:translateY(-1px)}100%{transform:translateY(0)}}
+.sheet.thunk{animation:thunk .45s ease}
+.none-note{margin-top:26px;font:500 11px                                                  var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.accept{margin-top:26px;border:1px solid                                                  var(--line2);background:var(--paper2);border-radius:2px;padding:16px
+20px;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap20px;display:fle;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.settle{margin-top:40px;border-top:2.5px solid
+var(--ink);padding-top:22px;display:flex;justify-content:space-between;align-items:cevar(--ink);padding-top:22px;display:flx;justify-content:space-between;align-items:center;gap:22px;flex-wrap:wrap}
+.settle-amt{font-size:clamp(30px,4vw,42px);font-weight:560;letter-spacing:-.02em;marg.settle-amt{font-size:clamp(30px,4vw,42px);font-weight:560;letter-spacing:-.02em;margin:6px 0 2px}
+.sheet-foot{margin-top:46px;border-top:1px solid
+var(--line);padding-top:14px;display:flex;justify-content:space-between;gap:14px;flexvar(--line);padding-top:14px;displayflex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.mark{font:500 10.5px
+var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+.mark a{text-decoration:underline;text-underline-offset:3px;color:var(--ink2)}            .mark a:hover{color:var(--ink)}
+@media(max-width:700px){.sheet{padding:0 22px 28px}.rule2{margin:0
+-22px}.d-item{grid-template-columns:1fr;gap:10px}.d-idx{display:none}.d-side{flex-dir-22px}.d-item{gridtemplate-columns:1fr;gap:10px}.d-idx{display:none}.d-side{flex-direction:row;width:100%;align-items:center;justify-content:space-between}}
+/* modal & toast */                                                                       #modals
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(30,25,15,.5);backdrop-filt.overlay{position:fixed;inset:0;z-index:60;background:rgba(30,25,15,.5);backdop-filter:blur(2px);display:grid;place-items:center;padding:22px;opacity:0;transition:opacityr:blur(2px);display:grid;place-items:center;padding:22px;opacity:0;transition:opacity .22s ease}
+#modals .overlay.on{opacity:1}
+.modal{width:min(600px,94vw);background:var(--card);border:1px solid
+var(--ink);border-radius:3px;box-shadow:10px 12px 0 rgba(34,29,20,.25);padding:28px
+30px;transform:translateY(12px);transition:transform .25s ease}
+.overlay.on .modal{transform:translateY(0)}
+.m-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16.m-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal h3{font-size:28px;font-weight:580;letter-spacing:-.01em}                           .m-body{color:var(--ink2);margin-top:10px}
+.m-row{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+.price{font-size:46px;font-weight:560;letter-spacing:-.02em;margin:8px 0 2px}
+.price span{font:500 13px var(--mono);letter-spacing:.08em;color:var(--ink2)}             .up-list{list-style:none;margin:18px 0 24px}
+.up-list li{display:flex;gap:11px;align-items:flex-start;padding:9px                      0;border-top:1px dotted var(--line2);font-size:15.5px}
+.up-list svg{width:15px;height:15px;color:var(--green);flex:none;margin-top:4px}          .share-url{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.share-url input{flex:1;min-width:200px;font:500 13px
+var(--mono);background:var(--paper);border:1px solid
+var(--line2);border-radius:2px;padding:11px 12px;color:var(--ink2)}                       #toasts{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;dis#toasts{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-widthlay:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-width:92vw}             .toast{background:var(--ink);color:var(--paper);font:500 12.5px
+var(--mono);padding:11px 18px;border-radius:2px;box-shadow:0 12px 30px -12px              rgba(0,0,0,.4);opacity:0;transform:translateY(8px);transition:.25s
+ease;text-align:center;max-width:92vw}                                                    .toast.on{opacity:1;transform:translateY(0)}
+.toast.err{background:var(--verm)}
+@keyframes
+viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:trnslateY(0)}}
+.view{animation:viewIn .4s ease both}                                                     @media
+(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001s!importa(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001s!mportant;transition:none!important}}                                                                       @media print{
+  .noprint,#toasts,#modals{display:none!important}
+  body{background:#fff;background-image:none}
+  .sheet{box-shadow:none;border:0;max-width:none;padding:0;margin:0}                        .rule2{margin:0}
+  .portal-bg{padding:0}
+  .d-btns .btn{display:none!important}
+}
+</style>
+</head>                                                                                   <body>
+<div id="app"></div>                                                                      <div id="modals"></div>                                                                   <div id="toasts" aria-live="polite"></div>                                                <script src="config.js"></script>
+  <script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.min.js"></script>
+<script>
+'use strict';
+/* ============ tiny helpers ============ */                                              const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];                                      const
+esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const app=document.getElementById('app');
+function refreshIcons(){try{window.lucide&&lucide.createIcons();}catch(e){}}
+function toast(msg,kind){const
+r=$('#toasts'),t=document.createElement('div');t.className='toast'+(kind?'                '+kind:'');t.textContent=msg;r.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('on'));setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300);},2800);}                                                       async function copyText(txt){try{await navigator.clipboard.writeText(txt);return
+true;}                                                                                      catch(e){try{const
+ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();const
+ok=document.execCommand('copy');ta.remove();return ok;}catch(e2){return false;}}}         /* stamp sound: a soft "thunk" synthesized on the fly — no assets */
+let AC=null;                                                                              function thunk(){try{
+  AC=AC||new (window.AudioContext||window.webkitAudioContext)();                            const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+  o.type='sine';o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAo.type='sine';o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(48,t+.14);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.5,t+.012);g.gaig.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.5,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+.24);
+  o.connect(g).connect(AC.destination);o.start(t);o.stop(t+.26);
+  const
+n=AC.createBufferSource(),buf=AC.createBuffer(1,2205,44100),d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);
+  const
+ng=AC.createGain(),f=AC.createBiquadFilter();n.buffer=buf;ng.gain.value=.15;f.type='lowpass';f.frequency.value=900;
+  n.connect(f).connect(ng).connect(AC.destination);n.start(t);                            }catch(e){}}
+/* ============ state ============ */
+const LS='handoff.studio.v1';
+const
+freshState=()=>({plan:'free',biz:'',email:'',payLink:'',checkout:'',portals:[]});
+let state=(function(){try{const
+s=JSON.parse(localStorage.getItem(LS));if(s&&Array.isArray(s.portals))return
+Object.assign(freshState(),s);}catch(e){}return freshState();})();
+function save(){try{localStorage.setItem(LS,JSON.stringify(state));}catch(e){}}
+const activeCount=()=>state.portals.filter(p=>!p.archived).length;
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);              const SYM={USD:'$',EUR:'\u20AC',GBP:'\u00A3',CHF:'CHF '};
+const PRESETS=['#1E5B40','#221D14','#B23A1D','#24405E','#6D2A1F','#7A5A1E'];              const hash=str=>{let h=5381;for(let
+i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))>>>0;return h;};                       const
+serialOf=s=>'HND-'+(hash(s)%1679616).toString(36).toUpperCase().padStart(4,'0');
+const baseURL=()=>location.href.split('#')[0].split('?')[0];
+const shareURL=code=>baseURL()+'#p='+code;
+const fmtDate=ts=>new
+Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});        const fmtStamp=ts=>new
+Date(ts||Date.now()).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'}).toUpperCase();
+const fmtDue=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||'')?fmtDate(new
+Date(s+'T12:00:00')):esc(s||'');                                                          const inDays=d=>new Date(Date.now()+d*864e5).toISOString().slice(0,10);                   function onBrand(hex){const
+m=/^#?([0-9a-f]{6})$/i.exec(hex||'');if(!m)return'#F5F1E8';
+  const v=parseInt(m[1],16),L=(0.2126*(v>>16&255)+0.7152*(v>>8&255)+0.0722*(v&255))/255;return L>0.6?'#221D14':'#F5F1E8';}
+/* ============ the link codec — a whole portal packed into a URL ============ */         const b64enc=bytes=>{let bin='';for(let
+i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);                                  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');};
+const b64dec=str=>{let                                                                    t=str.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';
+  const bin=atob(t),out=new Uint8Array(bin.length);for(let                                i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);return out;};                               async function deflateRaw(u8){if(typeof CompressionStream==='undefined')return null;        const s=new Blob([u8]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+  return new Uint8Array(await new Response(s).arrayBuffer());}                            async function inflateRaw(u8){const s=new Blob([u8]).stream().pipeThrough(new
+DecompressionStream('deflate-raw'));
+  return new Uint8Array(await new Response(s).arrayBuffer());}
+const
+PACK_KEYS=['biz','email','client','project','color','msg','pay','amount','currency','due','t'];
+const
+packData=(d,plan)=>({v:PACK_KEYS.map(k=>d[k]??''),i:(d.items||[]).map(it=>[it.t||'',it.n||'',it.u||'',it.s?1:0]),f:plan==='pro'?1:0});
+function unpackData(o){
+  if(!o||!Array.isArray(o.v)||o.v.length<PACK_KEYS.length||!Array.isArray(o.i))throw new Error('bad payload');
+  const d={};PACK_KEYS.forEach((k,i)=>d[k]=typeof o.v[i]==='string'?o.v[i]:'');
+  d.color=/^#[0-9a-fA-F]{6}$/.test(d.color)?d.color:'#1E5B40';
+  if(!SYM[d.currency])d.currency='USD';
+  d.t=+d.t||Date.now();
+  d.items=o.i.filter(Array.isArray).map(x=>({t:String(x[0]??''),n:String(x[1]??''),u:String(x[2]??''),s:x[3]?1:0}));
+  d.plan=o.f===1?'pro':'free';return d;}
+async function makeCode(data,plan){
+  const body=new TextEncoder().encode(JSON.stringify(packData(data,plan)));                 let payload=body,comp=false;                                                              try{const c=await
+deflateRaw(body);if(c&&c.length<body.length){payload=c;comp=true;}}catch(e){}               const all=new
+Uint8Array(payload.length+1);all[0]=(1<<4)|(comp?1:0);all.set(payload,1);                   return b64enc(all);}
+async function readCode(code){
+  const bytes=b64dec(code);if(!bytes.length||bytes[0]>>4!==1)throw new Error('bad header');
+  let body=bytes.slice(1);if(bytes[0]&1)body=await inflateRaw(body);
+  return unpackData(JSON.parse(new TextDecoder().decode(body)));}                         /* ============ approvals (per-portal, on the reader's device) ============ */
+const accKey=c=>'hnd.acc.'+hash(c);
+function getAcc(c){try{const
+v=JSON.parse(localStorage.getItem(accKey(c)));if(v&&v.items)return
+v;}catch(e){}return{items:{}};}                                                           function
+storeAcc(c,v){try{localStorage.setItem(accKey(c),JSON.stringify(v));}catch(e){}}          const readyIdx=d=>(d.items||[]).map((it,i)=>it.s?i:-1).filter(i=>i>=0);
+/* ============ context registry for interactive portals ============ */                  const CTXREG={};let ctxN=0;
+function regCtx(o){o.token='c'+(++ctxN);CTXREG[o.token]=o;return o.token;}
+function stampHTML(brand,label,ts,anim){return `<span
+class="stamp${label==='Accepted'?' major':''}${anim?' anim':''}"
+style="--si:${esc(brand||'#1E5B40')}"><b>${label}</b><i>${fmtStamp(ts)}</i></span>`;}
+function acceptBarHTML(d,serial,acc,ctx){
+  const r=readyIdx(d),ts=Math.max(...r.map(i=>acc.items[i]||0));
+  const list=r.map(i=>'- '+(d.items[i].t||'')).join('\n');                                  const note=`DELIVERY ACCEPTED\nNo. ${serial}\nProject: ${d.project||''}\nClient:
+${d.client||''}\nDate: ${fmtStamp(ts)}\n\nApproved                                        deliverables:\n${list}\n\nDelivered with Handoff`;
+  ctx.note=note;                                                                            const mail=d.email?`<a class="btn btn-green sm"
+href="mailto:${esc(d.email)}?subject=${encodeURIComponent('Delivery '+serial+'            accepted — '+(d.project||''))}&body=${encodeURIComponent(note)}"><i
+data-lucide="mail"></i>Email the studio</a>`                                                  :`<span class="mono-label" style="color:var(--ink3)">No studio email on
+file</span>`;                                                                               return `<div class="accept noprint"><span class="mono-label">All deliverables
+accepted — keep this as your paper trail.</span><span class="d-btns">${mail}<button       class="btn btn-line sm" data-action="copy-acc" data-ctx="${ctx.token}"><i
+data-lucide="copy"></i>Copy note</button></span></div>`;}                                 function maybeAccept(ctx,acc){
+  const r=readyIdx(ctx.data);
+  if(!r.length||!r.every(i=>acc.items[i]))return;
+  setTimeout(()=>{                                                                            const slot=$('.major-slot');if(!slot||slot.firstChild)return;
+    slot.innerHTML=stampHTML(ctx.data.color,'Accepted',Math.max(...r.map(i=>acc.items[i])),ctx.persist);                                                                                         thunk();
+    const sh=$('.sheet');if(sh){sh.classList.add('thunk');setTimeout(()=>sh.classList.remove('thunk'),480);}
+    if(ctx.persist){slot.insertAdjacentHTML('afterend',acceptBarHTML(ctx.data,ctx.serial,acc,ctx));refreshIcons();
+      setTimeout(()=>{const a=$('.accept');a&&a.scrollIntoView({behavior:'smooth',block:'nearest'});},160);}
+    else{const cap=$('.spec-cap');if(cap)cap.textContent='Approved, stamped, done — that\u2019s the whole product.';}
+  },430);}
+function doApprove(i,el){                                                                   const ctx=CTXREG[el.dataset.ctx];if(!ctx)return;
+  const it=ctx.data.items[i];if(!it)return;                                                 const link=it.u&&/^https?:\/\//i.test(it.u)?`<a class="btn btn-line sm noprint"
+href="${esc(it.u)}" target="_blank" rel="noopener">Open<i                                 data-lucide="arrow-up-right"></i></a>`:'';
+  if(ctx.persist){                                                                            const acc=getAcc(ctx.code);if(acc.items[i])return;
+    acc.items[i]=Date.now();storeAcc(ctx.code,acc);                                           const row=$(`.d-item[data-idx="${i}"]`);if(!row)return;
+    $('.d-side',row).innerHTML=`<span class="chip ok">Approved</span><div                 class="d-btns">${link}${stampHTML(ctx.data.color,'Approved',acc.items[i],true)}</div>class="d-bts">${link}${stampHTML(ctx.data.color,'Approved',acc.items[i],true)}</div>`;             row.classList.add('is-ok');thunk();refreshIcons();maybeAccept(ctx,acc);
+  }else{                                                                                      if(ctx.ok[i])return;ctx.ok[i]=Date.now();
+    const row=$(`.d-item[data-idx="${i}"]`);if(!row)return;                                   $('.d-side',row).innerHTML=`<span class="chip ok">Approved</span><div
+class="d-btns">${link}${stampHTML(ctx.data.color,'Approved',ctx.ok[i],true)}</div>`;          row.classList.add('is-ok');thunk();maybeAccept(ctx,{items:ctx.ok});
+  }}
+/* ============ the sheet — one function renders preview, demo and the real client
+portal ============ */                                                                    function sheetHTML(d,serial,acc,o){
+  const brand=d.color||'#1E5B40',onb=onBrand(brand);                                        const items=d.items||[],ready=readyIdx(d);
+  const doneCnt=ready.filter(i=>acc&&acc.items[i]).length;
+  const issued=o.issued||d.t||Date.now();                                                   const rows=items.map((it,i)=>{
+    const approved=!!(acc&&acc.items[i]);                                                     const link=it.u&&/^https?:\/\//i.test(it.u)?`<a class="btn btn-line sm noprint"
+href="${esc(it.u)}" target="_blank" rel="noopener">Open<i
+data-lucide="arrow-up-right"></i></a>`:'';
+    let side;
+    if(approved)side=`<span class="chip ok">Approved</span><div
+class="d-btns">${link}${stampHTML(brand,'Approved',acc.items[i],o.persist&&o.animIdx===i)}</div>`;
+    else if(it.s)side=`<span class="chip ready">Ready for review</span><div               class="d-btns">${link}<button class="btn btn-green sm noprint" data-action="approve"
+data-ctx="${o.token||''}" data-idx="${i}"><i data-lucide="stamp"></i>Stamp
+approval</button></div>`;                                                                     else side=`<span class="chip wip">In progress</span><div
+class="d-btns">${link}</div>`;                                                                return `<li class="d-item${approved?' is-ok':''}" data-idx="${i}">
+      <span class="d-idx">${String(i+1).padStart(2,'0')}</span>
+      <div><div class="d-title">${esc(it.t||'Untitled deliverable')}</div>${it.n?`<div class="d-note">${esc(it.n)}</div>`:''}</div>
+      <div class="d-side">${side}</div></li>`;}).join('');
+  const hasPay=d.pay&&/^https?:\/\//i.test(d.pay);
+  const hasAmt=String(d.amount||'').trim();                                                 const settle=(hasPay||hasAmt)?`<div class="settle"><div><span
+class="mono-label">Settlement</span>
+    <div class="settle-amt">${hasAmt?esc((SYM[d.currency]||'$')+' '+hasAmt):'By arrangement'}</div>                                                                           ${d.due?`<span class="mono-label">Due ${fmtDue(d.due)}</span>`:''}</div>
+    ${hasPay?`<a class="btn btn-green noprint" href="${esc(d.pay)}" target="_blank"       rel="noopener">Settle this invoice</a>`
+    :`<span class="mono-label" style="color:var(--ink3)">Payment arranged                 separately</span>`}</div>`:'';
+  const allDone=ready.length>0&&ready.every(i=>acc&&acc.items[i]);                          const majorBlock=allDone?`<div
+class="major-slot">${stampHTML(brand,'Accepted',Math.max(...ready.map(i=>acc.items[i])),o.persist)}</div>`:'<div class="major-slot"></div>';                                                const
+accept=(allDone&&o.persist&&o.token)?acceptBarHTML(d,serial,acc,CTXREG[o.token]):'';        const noneNote=!items.length?'':(ready.length?'':`<p class="none-note">Nothing is
+marked Ready yet — the studio flips items to Ready as work lands.</p>`);                    const foot=o.mark?`<div class="sheet-foot"><span class="mono-label">No.
+${esc(serial)}</span>${d.plan==='pro'                                                         ?`<span class="mono-label" style="color:var(--ink3)">Handoff</span>`
+    :`<span class="mark">Made with <a href="${baseURL()}" target="_blank"                 rel="noopener">Handoff</a> — the last link you send</span>`}</div>`:'';
+  return `<div class="sheet" style="--brand:${brand}">                                        <div class="rule2"></div>
+    <div class="sheet-top"><span class="mono-label">Delivery note</span><span
+class="mono-label">No. ${esc(serial)}</span></div>
+    <div class="sheet-head">                                                                    <div class="mono-mark"
+style="background:${brand};color:${onb}">${esc(((d.biz||'H').trim().charAt(0)||'H').toUpperCase())}</div>                                                                                       <div><div class="sheet-biz">${esc(d.biz||'Independent studio')}</div>
+      <div class="mono-label sheet-for">Prepared for                                      <b>${esc(d.client||'—')}</b></div></div>
+    </div>                                                                                    <h2 class="sheet-project">${esc(d.project||'Untitled project')}</h2>
+    ${d.msg?`<p class="sheet-msg">${esc(d.msg)}</p>`:''}                                      <div class="sheet-meta">
+      <div class="meta-row"><span>Issued</span><span                                      class="lead"></span><b>${fmtDate(issued)}</b></div>
+      <div class="meta-row"><span>Due</span><span                                         class="lead"></span><b>${d.due?fmtDue(d.due):'—'}</b></div>
+      <div class="meta-row"><span>Contents</span><span                                    class="lead"></span><b>${items.length} item${items.length===1?'':'s'} ·
+${ready.length} ready</b></div>                                                               </div>
+    <div class="d-head"><span class="mono-label">Deliverables</span><span                 class="mono-label" style="color:var(--ink3)">${doneCnt}/${ready.length||0}
+approved</span></div>                                                                         <ol class="dlist">${rows}</ol>
+    ${noneNote}${majorBlock}${accept}${settle}${foot}                                       </div>`;}
+/* ============ demo & templates ============ */                                          const SAMPLE={biz:'Atelier North',email:'studio@ateliernorth.example',client:'Meridian Hotels',                        project:'Brand Identity — Phase II',color:'#1E5B40',t:Date.now(),
+  msg:'Phase II is complete. Below: the expanded identity system, both packaging directions, and the motion principles we discussed. Everything marked Ready is final— stamp what you approve, and I release the source files the same day.',                    pay:'',amount:'6,800',currency:'USD',due:inDays(21),items:[
+    {t:'Identity system — 24 boards',n:'Lockups, type scale, color in use,                photography direction',u:'',s:1},
+    {t:'Packaging direction A — \u201CQuiet Luxe\u201D',n:'Three SKUs, print-ready        dielines',u:'',s:1},
+    {t:'Packaging direction B — \u201CField Notes\u201D',n:'Kraft stock, one-color        overprint studies',u:'',s:1},
+    {t:'Motion principles reel',n:'90-second reference cut, type behavior                 included',u:'',s:0}]};
+const TPL={
+  design:()=>({biz:state.biz,email:state.email,client:'',project:'Design delivery —',color:'#1E5B40',t:Date.now(),
+    msg:'Hi — everything final is below. Stamp what you approve and I\u2019ll release the source files the same day.',
+    pay:state.payLink,amount:'',currency:'USD',due:'',items:[
+      {t:'Final designs (Figma)',n:'All screens, components and styles — comments         open',u:'',s:1},
+      {t:'Asset export (ZIP)',n:'SVG + PNG at 1\u00D7/2\u00D7, favicon set                included',u:'',s:1},
+      {t:'Spec sheet (PDF)',n:'Type scale, spacing, color — the one-pager devs            read',u:'',s:0}]}),
+  dev:()=>({biz:state.biz,email:state.email,client:'',project:'Release —',color:'#24405E',t:Date.now(),
+    msg:'The milestone build is on staging. Changelog and handover docs below —           stamp to sign off.',
+    pay:state.payLink,amount:'',currency:'USD',due:'',items:[                                   {t:'Staging environment',n:'Latest build, test accounts attached',u:'',s:1},
+      {t:'Changelog',n:'Everything shipped this milestone',u:'',s:1},                           {t:'Handover docs',n:'Architecture notes and deploy runbook',u:'',s:0}]}),
+  content:()=>({biz:state.biz,email:state.email,client:'',project:'Content package —',color:'#B23A1D',t:Date.now(),
+    msg:'The full package is below — copy, imagery and the usage guide. Stamp to sign off.',
+    pay:state.payLink,amount:'',currency:'USD',due:'',items:[                                   {t:'Copy deck',n:'Final copy, tracked changes resolved',u:'',s:1},
+      {t:'Image set',n:'Retouched, web + print resolutions',u:'',s:1},
+      {t:'Usage guide',n:'Do / don\u2019t examples and licensing notes',u:'',s:0}]})};                                                                     /* ============ views ============ */
+function topbarApp(){return `<header class="top noprint"><div class="wrap top-in">
+  <a class="wordmark" href="#/"><span class="wm-mark">H</span>Handoff</a>
+  <span class="plan-chip mono-label">${state.plan==='pro'?'Pro plan':'Free ·              '+activeCount()+'/2 active'}</span>
+  <nav class="top-nav">                                                                       ${state.plan!=='pro'?`<a class="nav-a pro" ${state.checkout?'href="'+esc(state.checkout)+'" target="_blank" rel="noopener"':'href="#/pro" data-action="pro"'} target="_blank" rel="noopener">Go
+Pro</a>`:''}                                                                             <button class="nav-a" data-action="settings">Settings</button>
+    <a class="btn btn-green sm" href="#/new"><i data-lucide="plus"></i>New                portal</a>
+  </nav></div></header>`;}
+function renderLanding(){
+  document.title='Handoff — send client work in one link';window.scrollTo(0,0);
+  const token=regCtx({data:SAMPLE,persist:false,ok:{}});
+  const spec=sheetHTML(SAMPLE,serialOf(JSON.stringify(SAMPLE)),{items:{}},{mark:true,token,ctx:'spec'});
+  app.innerHTML=`<div class="view">
+  <header class="top noprint"><div class="wrap top-in">                                       <a class="wordmark" href="#/"><span class="wm-mark">H</span>Handoff</a>
+    <span class="mono-label top-tag">Client delivery, solved</span>                           <nav class="top-nav">
+      <button class="nav-a" data-action="scroll" data-t="how">How it works</button>             <button class="nav-a" data-action="scroll" data-t="pricing">Pricing</button>
+      <a class="btn btn-line sm" href="#/studio">Open studio</a>                              </nav></div></header>
+  <section class="wrap hero">                                                                 <div>
+      <p class="mono-label eyebrow">For independent studios &amp; freelancers</p>               <h1 class="display">One link between <em>finished work</em> and <em>getting
+paid.</em></h1>                                                                                 <p class="lede">Handoff turns your delivery into a branded page your client
+opens, approves, and pays from. No accounts. No attachments. No \u201Cso which file       is final?\u201D</p>
+      <div class="hero-cta">
+        <a class="btn btn-green" href="#/new"><i data-lucide="plus"></i>Create your
+first portal</a>                                                                                  <button class="btn btn-line" data-action="see-demo"><i
+data-lucide="eye"></i>See a live portal</button>
+      </div>
+      <p class="fine">No signup · Runs in your browser · Your client needs                nothing</p>
+    </div>                                                                                    <div class="specimen noprint">
+      <div class="spec-box"><div class="spec-scale">${spec}</div></div>                         <p class="mono-label spec-cap">A live Handoff portal — stamp something.</p>
+    </div>                                                                                  </section>
+  <section class="sect" id="how"><div class="wrap">                                           <div class="sec-label mono-label">§ 01 · How it works</div>
+    <div class="steps">                                                                         <div class="step"><span class="step-idx">01</span><div><h3>Write the
+manifest</h3><p>List what you\u2019re delivering. Paste a link to each piece —            Figma, Drive, GitHub, a zip — and flip the finished ones to <b>Ready</b>. Two
+minutes, tops.</p></div></div>                                                                  <div class="step"><span class="step-idx">02</span><div><h3>Copy one
+link</h3><p>Handoff packs the entire portal into the URL itself. Nothing is               uploaded, nothing is hosted, nothing expires. The link opens on any device, for
+anyone.</p></div></div>
+      <div class="step"><span class="step-idx">03</span><div><h3>They stamp. You get
+paid.</h3><p>Your client reviews, stamps each deliverable, and settles the invoice        on the same page. The acceptance lands in your inbox — your proof of
+delivery.</p></div></div>                                                                     </div></div></section>
+  <section class="sect" id="features"><div class="wrap">                                      <div class="sec-label mono-label">§ 02 · Why it converts</div>
+    <div>                                                                                       <div class="feat"><div class="feat-l"><span
+class="feat-idx">01</span><h3>Approvals that feel official</h3></div><p>A rubber          stamp your client can\u2019t resist slamming — and an email trail you can invoice         against.</p></div>
+      <div class="feat"><div class="feat-l"><span
+class="feat-idx">02</span><h3>Payment at the peak</h3></div><p>Your pay link sits on      the page where the work looks its best — not buried under an email                        signature.</p></div>
+      <div class="feat"><div class="feat-l"><span class="feat-idx">03</span><h3>Zero      onboarding</h3></div><p>Clients never sign up, never install, never see a dashboard.
+The link is the entire product.</p></div>
+      <div class="feat"><div class="feat-l"><span class="feat-idx">04</span><h3>The
+link is the server</h3></div><p>Portals travel inside the URL. No database to
+breach, no files to leak, no infrastructure to babysit.</p></div>
+      <div class="feat"><div class="feat-l"><span class="feat-idx">05</span><h3>Your
+brand up front</h3></div><p>Color, monogram, tone of voice. It reads as you — the
+Handoff mark stays politely small. <span class="mono-label">(Pro)</span></p></div>
+      <div class="feat"><div class="feat-l"><span
+class="feat-idx">06</span><h3>Snapshots, not live docs</h3></div><p>Every copy is         frozen in time. Edit later and old links keep their integrity — exactly what              sign-off needs.</p></div>
+    </div></div></section>                                                                  <section class="sect" id="pricing"><div class="wrap price-grid">
+    <div>
+      <div class="sec-label mono-label">§ 03 · Pricing</div>
+      <h2 class="display-2">Priced like a tool,<br><em>not a platform.</em></h2>
+      <p class="lede-sm" style="margin-top:18px">The free tier is a complete
+product, not a demo. Pro exists for people who deliver for a living — and removes
+the ceiling.</p>                                                                                <p class="fine" style="margin-top:28px">Handoff never touches your money.           Invoices are yours.</p>                                                                       </div>                                                                                    <div class="tiers">
+      <div class="tier"><span class="mono-label">Free</span><div                          class="t-price">$0<span> / forever</span></div>
+        <ul class="t-list">
+          <li><i data-lucide="check"></i>2 active portals</li>                                      <li><i data-lucide="check"></i>5 deliverables per portal</li>                             <li><i data-lucide="check"></i>Curated brand presets</li>                                 <li><i data-lucide="check"></i>Acceptance trail by email</li>
+          <li><i data-lucide="check"></i>Handoff mark on portals — your clients
+discover how you shipped it</li>
+        </ul>
+        <a class="btn btn-line wide" href="#/new">Start free</a></div>
+      <div class="tier tier-pro"><span class="ptag">Pro</span><div
+class="t-price">$15<span> / month</span></div>
+        <ul class="t-list">
+          <li><i data-lucide="check"></i>Unlimited portals &amp; deliverables</li>
+          <li><i data-lucide="check"></i>Remove the Handoff mark entirely</li>
+          <li><i data-lucide="check"></i>Any brand color</li>                                       <li><i data-lucide="check"></i>Priority email support</li>                                <li><i data-lucide="check"></i>Every new feature, first</li>
+        </ul>
+        <a class="btn wide"
+style="background:var(--paper);color:var(--ink);border-color:var(--paper)"
+${state.checkout?'href="'+esc(state.checkout)+'" target="_blank" rel="noopener"':'href="#/pro" data-action="pro"'} target="_blank" rel="noopener">Go Pro — $15/mo</a></div>
+    </div></div></section>
+  <section class="sect" id="faq"><div class="wrap">
+    <div class="sec-label mono-label">§ 04 · Fair questions</div>
+    <details><summary>Where does my data actually live?</summary><p>In your browser       and inside the link itself — compressed into the URL. There is no server, no
+account, no database. Export your studio to a file anytime; erase everything with         one click.</p></details>
+    <details><summary>Do my clients need an account?</summary><p>No. The link is the      app. It opens like a beautifully typeset delivery note and works on any device —
+phone, tablet, laptop.</p></details>                                                          <details><summary>How does the money side work?</summary><p>You keep 100% of
+your client income — Handoff never processes your invoices. You paste your own
+payment link (Stripe, PayPal, anything) into each portal. For the Pro subscription,
+you connect your own Stripe Payment Link in Settings; after payment, Stripe sends         buyers back to your site with <code>?pro=1</code> and they unlock
+automatically.</p></details>                                                                  <details><summary>What happens if I stop paying?</summary><p>Every link               you\u2019ve already sent keeps working forever — the data travels inside it.              You\u2019d only lose unlimited creation and the Pro cosmetics.</p></details>
+  </div></section>                                                                          <section class="band"><div class="wrap band-in">
+    <h2 class="display">Your work is already excellent.<br><em>Send it that               way.</em></h2>
+    <a class="btn btn-green" href="#/new">Create a portal — free</a>                        </div></section>
+  <footer class="foot"><div class="wrap foot-in">                                             <a class="wordmark" href="#/"><span class="wm-mark">H</span>Handoff</a>
+    <span class="mono-label">The last link you send</span>
+    <span class="mono-label" style="margin-left:auto">One HTML file · No servers ·
+No cookies · No tracking</span>                                                             </div></footer></div>`;
+  refreshIcons();}                                                                        function emptyStudio(){return `<div class="empty">
+  <h3 class="display-2" style="font-size:clamp(28px,4vw,44px)">Nothing delivered          yet.</h3>
+  <p class="lede-sm" style="margin-top:12px">Start from a template — every field          stays editable afterwards.</p>
+  <div class="tpls">                                                                          <button class="tpl" data-action="tpl" data-tpl="design"><span                         class="mono-label">Template 01</span><b>Design delivery</b><span class="dsc">Boards
+· assets · specs</span></button>
+    <button class="tpl" data-action="tpl" data-tpl="dev"><span                            class="mono-label">Template 02</span><b>Development release</b><span
+class="dsc">Staging · changelog · handover</span></button>                                    <button class="tpl" data-action="tpl" data-tpl="content"><span
+class="mono-label">Template 03</span><b>Content package</b><span class="dsc">Copy ·       imagery · usage</span></button>
+  </div>                                                                                    <button class="btn btn-line" data-action="tpl" data-tpl="sample">Or load the
+sample portal</button>                                                                      <p class="fine" style="margin-top:28px">Everything stays in this browser until you
+export it.</p></div>`;}                                                                   function renderStudio(){
+  document.title='Studio — Handoff';window.scrollTo(0,0);                                   const rows=state.portals.slice().sort((a,b)=>b.created-a.created).map(p=>{
+    const serial=serialOf(p.code||p.id),n=(p.data.items||[]).length;                          return `<article class="p-row${p.archived?' is-arch':''}">                                  <span class="p-no">${serial}</span>                                                       <div><div class="p-title">${esc(p.data.project||'Untitled project')}</div>
+      <div class="p-sub">for ${esc(p.data.client||'—')} · ${n}                            item${n===1?'':'s'}</div></div>
+      <span class="chip
+${p.archived?'wip':'ok'}">${p.archived?'Archived':'Live'}</span>
+      <span class="p-date">${fmtDate(p.created)}</span>                                         <div class="p-acts">
+        <a class="ibtn" href="#p=${p.code}" aria-label="Open portal" title="Open          portal"><i data-lucide="eye"></i></a>
+        <button class="ibtn" data-action="copy-url"                                       data-url="${esc(p.url||shareURL(p.code))}" aria-label="Copy link" title="Copy
+link"><i data-lucide="copy"></i></button>
+        <a class="ibtn" href="#/edit/${p.id}" aria-label="Edit" title="Edit"><i
+data-lucide="pen-line"></i></a>                                                                   <button class="ibtn" data-action="archive" data-id="${p.id}"
+aria-label="${p.archived?'Restore':'Archive'}"                                            title="${p.archived?'Restore':'Archive'}"><i
+data-lucide="${p.archived?'archive-restore':'archive'}"></i></button>                             <button class="ibtn danger" data-action="del" data-id="${p.id}"
+aria-label="Delete" title="Delete"><i data-lucide="trash-2"></i></button>                       </div></article>`;}).join('');
+  app.innerHTML=`<div class="view">${topbarApp()}<main class="wrap studio">                   <div class="s-head"><div><h2 class="display-2">Studio</h2>
+      <p class="lede-sm" style="margin-top:8px">Every portal is one self-contained        link. Copy it, send it — it opens anywhere, for anyone.</p></div>
+      <span class="plan-chip mono-label">${state.plan==='pro'?'Pro plan':'Free plan       · '+activeCount()+'/2 active'}</span></div>
+    ${state.portals.length?`<div class="p-list">${rows}</div>`:emptyStudio()}               </main></div>`;
+  refreshIcons();}                                                                        /* builder */
+let draft=null,editing=null;
+const
+defaultDraft=()=>({biz:state.biz||'',email:state.email||'',client:'',project:'',color:'#1E5B40',msg:'',
+  pay:state.payLink||'',amount:'',currency:'USD',due:'',t:Date.now(),items:[{t:'',n:'',u:'',s:0}]});
+const curOpts=()=>['USD','EUR','GBP','CHF'].map(c=>`<option
+value="${c}"${(draft.currency||'USD')===c?' selected':''}>${c} ·
+${SYM[c]}</option>`).join('');
+function swatchesHTML(){const cur=(draft.color||'').toLowerCase();
+  return PRESETS.map(c=>`<button type="button" class="sw${cur===c?' on':''}"
+style="--c:${c}" data-action="preset" data-c="${c}" aria-label="Brand color
+${c}"></button>`).join('')                                                                  +(state.plan==='pro'?`<input type="color" id="f-color" value="${esc(cur)}"
+aria-label="Custom brand color">`                                                           :`<button type="button" class="sw sw-custom" data-action="custom-color"                 title="Custom color — Pro" aria-label="Custom color (Pro)"><i                             data-lucide="lock"></i></button>`);}
+function renderRows(){const box=$('#drows');if(!box)return;                                 box.innerHTML=draft.items.map((it,i)=>`<div class="d-row">
+    <span class="d-n">${String(i+1).padStart(2,'0')}</span>                                   <div class="d-main-c">
+      <input data-k="t" value="${esc(it.t)}" placeholder="Deliverable — e.g. Final        boards (Figma)">
+      <input class="thin" data-k="n" value="${esc(it.n)}" placeholder="One-line note      (optional)">                                                                                  </div>                                                                                    <input data-k="u" value="${esc(it.u)}" placeholder="https:// link (Figma, Drive,
+zip\u2026)">
+    <select data-k="s" aria-label="Status"><option value="0"${it.s?'':' selected'}>In progress</option><option value="1"${it.s?' selected':''}>Ready for review</option></select>
+    <button type="button" class="ibtn" data-action="del-item" aria-label="Remove deliverable"><i data-lucide="x"></i></button>
+  </div>`).join('');refreshIcons();}
+function syncSwatches(){const box=$('#swatches');if(!box)return;
+  $$('.sw',box).forEach(b=>b.classList.toggle('on',(b.dataset.c||'').toLowerCase()===(draft.color||'').toLowerCase()));
+  const ci=$('#f-color');if(ci)ci.value=(draft.color||'#1E5B40').toLowerCase();}          function readDraft(){
+  const g=k=>{const n=$('#bform [data-k="'+k+'"]');return n?n.value:'';};
+  ['biz','email','client','project','msg','due','pay','amount'].forEach(k=>draft[k]=g(k));
+  const c=$('#bform [data-k="currency"]');if(c)draft.currency=c.value;
+  draft.items=$$('#drows .d-row').map(r=>({                                                   t:r.querySelector('[data-k="t"]').value,n:r.querySelector('[data-k="n"]').value,
+    u:r.querySelector('[data-k="u"]').value,s:r.querySelector('[data-k="s"]').value==='1'?1:0}));}
+function updatePreview(){const pv=$('#pv');if(!pv||!draft)return;
+  const token=regCtx({data:draft,persist:false,ok:{}});
+  pv.innerHTML=sheetHTML(draft,'\u00B7 \u00B7 \u00B7 \u00B7',{items:{}},{mark:true,token,issued:draft.t||Date.now()});
+  refreshIcons();}                                                                        function bindBuilder(){const f=$('#bform');if(!f)return;
+  f.addEventListener('submit',e=>e.preventDefault());                                       f.addEventListener('input',()=>{readDraft();updatePreview();});
+  const ci=$('#f-color');if(ci)ci.addEventListener('input',e=>{draft.color=e.target.value;syncSwatches();updatePreview();});}
+function renderBuilder(id){
+  document.title=(id?'Edit portal':'New portal')+' — Handoff';window.scrollTo(0,0);
+  editing=id||null;
+  if(editing){const p=state.portals.find(x=>x.id===editing);
+    if(!p){toast('That portal no longer exists.','err');return go('#/studio');}
+    draft=JSON.parse(JSON.stringify(p.data));}                                              else draft=defaultDraft();                                                                const banner=(!editing&&state.plan!=='pro'&&activeCount()>=2)
+    ?`<div class="m-note-banner"><span class="mono-label"
+style="color:var(--verm)">Free plan full — ${activeCount()}/2 active
+portals.</span><a class="tlink" ${state.checkout?'href="'+esc(state.checkout)+'" target="_blank" rel="noopener"':'href="#/pro" data-action="pro"'} target="_blank"
+rel="noopener">Go Pro</a><span
+class="mono-label" style="color:var(--ink3)">or archive one in the
+studio</span></div>`:'';
+  app.innerHTML=`<div class="view">${topbarApp()}
+  <main class="builder">
+    <div class="m-toggle noprint">
+      <button class="btn btn-line sm on" data-action="pane"                               data-p="form">Compose</button>                                                                  <button class="btn btn-line sm" data-action="pane"
+data-p="prev">Preview</button>
+    </div>
+    <div class="form-pane" id="formPane">
+      ${banner}
+      <div class="b-head"><h2 class="display-2"
+style="font-size:clamp(26px,3vw,36px)">${editing?'Edit portal':'New portal'}</h2>
+      <span class="mono-label" style="color:var(--ink3)">${editing?'Saving creates a fresh link':'The client sees exactly this'}</span></div>
+      <form id="bform" autocomplete="off" novalidate>                                             <div class="fsec"><span class="mono-label">01 · The parties</span></div>
+        <div class="f-grid three">
+          <div class="field"><label class="mono-label" for="f-biz">Your
+business</label><input id="f-biz" data-k="biz" value="${esc(draft.biz)}"
+placeholder="Atelier North"></div>
+          <div class="field"><label class="mono-label" for="f-email">Your
+email</label><input id="f-email" data-k="email" type="email"
+value="${esc(draft.email)}" placeholder="you@studio.com"></div>
+          <div class="field"><label class="mono-label"                                    for="f-client">Client</label><input id="f-client" data-k="client"
+value="${esc(draft.client)}" placeholder="Meridian Hotels"></div>
+        </div>
+        <div class="fsec"><span class="mono-label">02 · The work</span></div>
+        <div class="field"><label class="mono-label" for="f-project">Project
+title</label><input id="f-project" data-k="project" value="${esc(draft.project)}"
+placeholder="Brand identity — Phase II"></div>
+        <div class="field"><label class="mono-label" for="f-msg">Note to the
+client</label><textarea id="f-msg" data-k="msg" rows="3" placeholder="Hi —
+everything final lives below. Stamp what you approve and I\u2019ll release the
+source files the same day.">${esc(draft.msg)}</textarea></div>
+        <div class="f-grid">
+          <div class="field"><label class="mono-label" for="f-due">Target
+date</label><input id="f-due" data-k="due" type="date"
+value="${esc(draft.due||'')}"></div>
+          <div class="field"><label class="mono-label">Brand color</label><div
+class="swatches" id="swatches">${swatchesHTML()}</div></div>                                      </div>                                                                                    <div class="fsec"><span class="mono-label">03 · The                               deliverables</span></div>                                                                         <div id="drows"></div>                                                                    <div class="limit-note" id="limitNote" hidden>Free plan packs 5 deliverables
+per portal — <a class="tlink" ${state.checkout?'href="'+esc(state.checkout)+'" target="_blank" rel="noopener"':'href="#/pro" data-action="pro"'} target="_blank"
+rel="noopener">go Pro</a>        for unlimited.</div>
+        <button type="button" class="btn btn-ghost sm" data-action="add-item"><i          data-lucide="plus"></i>Add deliverable</button>
+        <p class="ferr" id="errItems" hidden>Give at least one deliverable a              title.</p>
+        <div class="fsec"><span class="mono-label">04 · The settlement</span></div>               <div class="f-grid">
+          <div class="field"><label class="mono-label"                                    for="f-cur">Currency</label><select id="f-cur"
+data-k="currency">${curOpts()}</select></div>
+          <div class="field"><label class="mono-label" for="f-amt">Amount
+due</label><input id="f-amt" data-k="amount" value="${esc(draft.amount||'')}"
+placeholder="6,800"></div>                                                                        </div>
+        <div class="field"><label class="mono-label" for="f-pay">Payment link —
+where your client pays you</label><input id="f-pay" data-k="pay"                          value="${esc(draft.pay||'')}" placeholder="https://buy.stripe.com/\u2026 (Stripe,
+PayPal, anything)"></div>                                                                         <p class="ferr" id="errProject" hidden>Give the project a title.</p>
+        <div class="save-bar">
+          <a class="btn btn-ghost" href="#/studio">Cancel</a>
+          <button type="button" class="btn btn-green" data-action="save-portal"><i        data-lucide="stamp"></i>${editing?'Save — new link':'Save & get the link'}</button>
+        </div>
+      </form>
+    </div>                                                                                    <aside class="preview-pane" id="pvPane">
+      <div class="pv-cap"><span class="mono-label">Client view</span><span
+class="mono-label" style="color:var(--ink3)">live · updates as you type</span></div>
+      <div id="pv"></div>
+    </aside>
+  </main></div>`;
+  renderRows();bindBuilder();updatePreview();refreshIcons();}                             async function savePortal(){                                                                readDraft();let ok=true;
+  const pj=$('#f-project');
+  if(!draft.project.trim()){ok=false;pj.closest('.field').classList.add('bad');$('#errProject').hidden=false;pj.focus();}                                                                    else{$('#errProject').hidden=true;pj.closest('.field').classList.remove('bad');}
+  if(!draft.items.some(i=>i.t.trim())){ok=false;$('#errItems').hidden=false;}else
+$('#errItems').hidden=true;
+  if(!ok)return;                                                                            if(!editing&&state.plan!=='pro'&&activeCount()>=2){openUpgrade();return;}
+  const code=await makeCode(draft,state.plan);
+  if(editing){const p=state.portals.find(x=>x.id===editing);if(p)Object.assign(p,{data:draft,code,url:shareURL(code)});}
+  else
+state.portals.push({id:uid(),created:Date.now(),archived:false,data:draft,code,url:shareURL(code)});
+  state.biz=draft.biz||state.biz;state.email=draft.email||state.email;
+  save();toast('Portal saved — link is live.');                                             const id=editing||state.portals[state.portals.length-1].id;
+  go('#/studio');setTimeout(()=>openShare(id),280);}                                      /* ============ client portal ============ */
+async function renderPortalClient(code){
+  document.title='Delivery note — Handoff';window.scrollTo(0,0);
+  app.innerHTML=`<div class="portal-bg view"><p class="mono-label"
+style="text-align:center;padding:90px 20px;color:var(--ink2)">Opening the                 delivery\u2026</p></div>`;
+  let data;
+  try{data=await readCode(code);}
+  catch(e){
+    app.innerHTML=`<div class="portal-bg view"><div class="sheet"><div
+class="rule2"></div>
+      <div class="sheet-top"><span class="mono-label">Handoff</span><span                 class="mono-label">No. —</span></div>
+      <h2 class="sheet-project">This link didn\u2019t survive the trip.</h2>                    <p class="sheet-msg">A Handoff portal lives entirely inside the link — nothing
+sits on a server. If the link was cut short somewhere in transit, ask the sender to       re-copy the complete string.</p>
+      <div class="sheet-foot"><span class="mono-label">Handoff</span><span                class="mark"><a href="${baseURL()}">What is Handoff?</a></span></div></div></div>`;
+    refreshIcons();return;}                                                                 const acc=getAcc(code),serial=serialOf(code);
+  const ctxToken=regCtx({data,code,serial,note:'',persist:true});                           app.innerHTML=`<div class="portal-bg view">
+    <div class="portal-tools noprint"><button class="btn btn-ghost sm" data-action="print"><i data-lucide="printer"></i>Print / PDF</button></div>
+    ${sheetHTML(data,serial,acc,{persist:true,mark:true,token:ctxToken,ctx:'client'})}
+  </div>`;                                                                                  refreshIcons();}
+/* ============ modals ============ */                                                    let pendingConfirm=null;
+function modal(inner){const root=$('#modals');
+  root.innerHTML=`<div class="overlay"><div class="modal">${inner}</div></div>`;            const
+o=root.firstElementChild;requestAnimationFrame(()=>o.classList.add('on'));refreshIcons();}
+function closeModal(){const o=$('#modals .overlay');if(!o)return;
+  o.classList.remove('on');const p=pendingConfirm;pendingConfirm=null;                      setTimeout(()=>{$('#modals').innerHTML='';},180);if(p)p(false);}
+function confirmBox(opt){return new Promise(res=>{                                          pendingConfirm=res;
+  modal(`<div class="m-top"><span class="mono-label">Confirm</span><button
+class="ibtn" data-action="close" aria-label="Close"><i
+data-lucide="x"></i></button></div>
+    <h3>${esc(opt.title)}</h3><p class="m-body">${esc(opt.body||'')}</p>
+    <div class="m-row"><button class="btn btn-ghost"                                      data-action="close">Cancel</button>
+    <button class="btn" id="cf-go"${opt.danger?' style="background:var(--verm);border-color:var(--verm)"':''}>${esc(opt.yes||'Confirm')}</button></div>`);
+  $('#cf-go').addEventListener('click',()=>{pendingConfirm=null;const o=$('#modals .overlay');
+    if(o){o.classList.remove('on');setTimeout(()=>{$('#modals').innerHTML='';},170);}res(true);});});}                                                                                       function openShare(id){const                                                              p=state.portals.find(x=>x.id===id);if(!p||!p.code)return;                                   const url=p.url||shareURL(p.code),n=(p.data.items||[]).length;
+  modal(`<div class="m-top"><span class="mono-label">Share —                              ${serialOf(p.code)}</span><button class="ibtn" data-action="close"
+aria-label="Close"><i data-lucide="x"></i></button></div>                                     <h3>One link, ready to send.</h3>
+    <p class="m-body">${n} deliverable${n===1?'':'s'} · packs to ${url.length}            characters · nothing is uploaded.</p>
+    <div class="share-url"><input readonly value="${esc(url)}"                            onfocus="this.select()">
+      <button class="btn" data-action="copy-url" data-url="${esc(url)}"><i                data-lucide="copy"></i>Copy</button></div>
+    <div class="m-row">                                                                         <a class="btn btn-line" href="#p=${p.code}"><i data-lucide="eye"></i>Open
+portal</a>
+      <a class="btn btn-ghost"
+href="mailto:${encodeURIComponent(p.data.email||'')}?subject=${encodeURIComponent((p.data.project||'Delivery')+' — ready for your review')}&body=${encodeURIComponent('Hi '+(p.data.client||'there')+',\n\nEverything is ready here:\n\n'+url+'\n\n— '+(p.data.biz||''))}"><i data-lucide="mail"></i>Compose email</a>                             </div>
+    <p class="fine"                                                                       style="margin-top:24px;text-transform:none;letter-spacing:.02em">The portal travels
+inside the link. Editing later creates a new link — this one never breaks.</p>`);}
+function openUpgrade(msg){
+  const feats=['Unlimited portals & deliverables','Remove the Handoff mark                entirely','Any brand color','Priority email support','Every new feature, first'];
+  modal(`<div class="m-top"><span class="mono-label">Upgrade</span><button                class="ibtn" data-action="close" aria-label="Close"><i
+data-lucide="x"></i></button></div>                                                           <h3>Handoff Pro</h3><div class="price">$15<span> / month</span></div>
+    <ul class="up-list">${feats.map(f=>`<li><i
+data-lucide="check"></i>${f}</li>`).join('')}</ul>                                            ${hasLicense()
+      ?`<p class="fine" style="text-transform:none;letter-spacing:.02em;color:var(--ink2)">Pro is active on this browser${licVal&&licVal.email?' — '+esc(licVal.email):''}. Manage billing anytime via Settings.</p>`
+      :`<a class="btn btn-green wide" data-action="pro" href="#/pro">Continue to secure checkout — $15/mo</a>`}
+    <button class="btn btn-line wide" data-action="simulate"
+style="margin-top:12px">Test-drive Pro locally</button>                         <p class="fine"
+style="margin-top:22px;text-transform:none;letter-spacing:.02em">Self-serve for studios: after subscribing, use Settings to point
+Handoff checkout at your own Payment Link instead.</p>`);}                                   function openSettings(){
+  modal(`<div class="m-top"><span class="mono-label">Studio settings</span><button
+class="ibtn" data-action="close" aria-label="Close"><i
+data-lucide="x"></i></button></div>
+    <h3>Defaults &amp; wiring</h3>
+    <div class="field" style="margin-top:18px"><label class="mono-label">Business
+name — pre-fills new portals</label><input data-k="sbiz"
+value="${esc(state.biz)}"></div>                                                              <div class="field"><label class="mono-label">Your email — acceptance notices
+arrive here</label><input data-k="semail" type="email"                                    value="${esc(state.email)}"></div>
+    <div class="field"><label class="mono-label">Your payment link — shown to your        clients</label><input data-k="spay" placeholder="https://your-payment-link\u2026"
+value="${esc(state.payLink)}"></div>                                                          <div class="field"><label class="mono-label">Handoff checkout link — your Stripe
+$15/mo Payment Link</label><input data-k="sck"                                            placeholder="https://buy.stripe.com/\u2026" value="${esc(state.checkout)}"></div>
+    <div class="m-row">                                                                         <button class="btn" data-action="save-settings">Save defaults</button>                    <button class="btn btn-line" data-action="export">Export studio</button>
+      <button class="btn btn-line" data-action="import">Import</button>
+      <button class="btn btn-ghost" data-action="wipe">Erase everything</button>              </div>
+    <div class="m-row" style="margin-top:8px;align-items:center">                               <span class="mono-label" style="color:var(--ink3)">Plan:
+${state.plan==='pro'?'Pro — thanks for backing it':'Free'}</span>                               ${hasLicense() ? `<button class="btn btn-line sm" data-action="portal">Manage subscription</button>` : (state.plan!=='pro' ? `<a class="btn btn-green sm" data-action="pro" href="#/pro">Upgrade — $15/mo</a>` : ``)}
+    </div>`);}
+/* ============ actions & routing ============ */
+const ACTIONS={
+  'scroll':el=>{const                                                                     t=document.getElementById(el.dataset.t);t&&t.scrollIntoView({behavior:'smooth'});},
+  'see-demo':async()=>{location.hash='p='+await makeCode(SAMPLE,'pro');},                   'approve':el=>doApprove(+el.dataset.idx,el),
+  'copy-acc':async el=>{const ctx=CTXREG[el.dataset.ctx];const ok=await                   copyText(ctx&&ctx.note?ctx.note:'');
+    toast(ok?'Acceptance note copied.':'Copy blocked — sorry.',ok?'':'err');},              'copy-url':async el=>{const ok=await copyText(el.dataset.url||'');
+    toast(ok?'Link copied — send it anywhere.':'Copy blocked — select the text            manually.',ok?'':'err');},
+  'print':()=>window.print(),
+  'save-portal':()=>savePortal(),
+  'add-item':()=>{readDraft();const cap=state.plan==='pro'?24:5;
+    if(draft.items.length>=cap){const
+n=$('#limitNote');if(n){n.hidden=false;n.classList.remove('shake');void
+n.offsetWidth;n.classList.add('shake');}return;}
+    draft.items.push({t:'',n:'',u:'',s:0});renderRows();readDraft();updatePreview();
+    const rows=$$('#drows .d-row'),last=rows[rows.length-1];const                         ti=last&&last.querySelector('[data-k="t"]');ti&&ti.focus();},
+  'del-item':el=>{readDraft();draft.items.splice(+el.dataset.idx,1);                          if(!draft.items.length)draft.items.push({t:'',n:'',u:'',s:0});
+    renderRows();readDraft();updatePreview();},                                             'preset':el=>{draft.color=el.dataset.c;syncSwatches();updatePreview();},
+  'custom-color':()=>{if(state.plan!=='pro')openUpgrade('Custom brand colors are          part of Pro.');else{const ci=$('#f-color');ci&&ci.click();}},
+  'pane':el=>{const fp=$('#formPane'),pp=$('#pvPane');if(!fp)return;
+    const toPrev=el.dataset.p==='prev';fp.classList.toggle('off',toPrev);pp.classList.toggle('on',toPrev);
+    $$('.m-toggle .btn').forEach(b=>b.classList.toggle('on',b===el));},                     'pro':()=>{platformCheckout();},
+  'save-ck':()=>{const n=$('[data-k="ck"]');const v=n?n.value.trim():'';                      if(!v){toast('Paste your Stripe Payment Link first.','err');return;}
+    state.checkout=v;save();closeModal();setTimeout(openUpgrade,200);toast('Checkout connected.');},
+  'simulate':()=>{state.plan='pro';save();closeModal();route();                               toast('Pro unlocked — local test only. Real buyers unlock via your Stripe link.');},                                                                                  'portal':async()=>{try{const r=await fetch(api('/api/portal'),{method:'POST',headers:{Authorization:'Bearer '+licToken()}});const d=await r.json();if(d.url)window.open(d.url,'_blank','noopener');else toast(d.error||'Portal unavailable','err');}catch{toast('Billing portal unreachable','err');}},
+  'settings':()=>openSettings(),
+  'save-settings':()=>{const g=k=>{const n=$('[data-k="'+k+'"]');return
+n?n.value.trim():'';};
+    state.biz=g('sbiz');state.email=g('semail');state.payLink=g('spay');state.checkout=g('sck');
+    save();closeModal();route();toast('Defaults saved.');},                                 'export':()=>{const blob=new
+Blob([JSON.stringify(state,null,2)],{type:'application/json'});                               const
+a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='handoff-studio.json';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),800);                                                                                           toast('Studio exported.');},                                                            'import':()=>{const fi=$('#importFile');fi&&fi.click();},
+  'wipe':async()=>{if(await confirmBox({title:'Erase the entire studio?',body:'All portals, settings and saved approvals on this browser will be deleted. Links you already sent keep working — their data travels inside them.',yes:'Erase everything',danger:true})){
+                                                                                          try{localStorage.removeItem(LS);}catch(e){}state=freshState();go('#/');toast('Studio erased.');}},                                                                               'archive':el=>{const p=state.portals.find(x=>x.id===el.dataset.id);if(!p)return;
+    p.archived=!p.archived;save();route();toast(p.archived?'Archived — it no longer counts toward your limit.':'Portal restored.');},
+  'del':el=>{const p=state.portals.find(x=>x.id===el.dataset.id);if(!p)return;
+    confirmBox({title:'Delete \u201C'+(p.data.project||'Untitled')+'\u201D?',body:'It disappears from this studio. Links already sent keep working — their data is baked in.',yes:'Delete portal',danger:true})
+                                                                                          .then(y=>{if(!y)return;state.portals=state.portals.filter(x=>x.id!==el.dataset.id);save();route();toast('Portal deleted.');});},                                                            'tpl':el=>{(async()=>{const t=el.dataset.tpl;
+    if(state.plan!=='pro'&&activeCount()>=2){openUpgrade();return;}                                                             const data=t==='sample'?JSON.parse(JSON.stringify(SAMPLE)):TPL[t]();
+    const code=await makeCode(data,state.plan);
+    const                                                                                 p={id:uid(),created:Date.now(),archived:false,data,code,url:shareURL(code)};
+    state.portals.push(p);save();toast('Portal created.');                                    go('#/studio');setTimeout(()=>openShare(p.id),260);})();},
+  'close':()=>closeModal()};
+document.addEventListener('click',e=>{                                                      const el=e.target.closest('[data-action]');
+  if(el){const                                                                            fn=ACTIONS[el.dataset.action];if(fn){e.preventDefault();fn(el);return;}}
+  if(e.target&&e.target.classList&&e.target.classList.contains('overlay'))closeModal();});       document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+function go(h){if(location.hash===h)route();else location.hash=h;}                        function route(){const h=location.hash||'';
+  if(h.indexOf('#p=')===0){renderPortalClient(h.slice(3));return;}
+  if(h==='#/'||h==='#'||h===''){renderLanding();return;}
+  if(h==='#/studio'){renderStudio();return;}
+  if(h==='#/new'){renderBuilder(null);return;}                                              if(h.indexOf('#/edit/')===0){renderBuilder(h.slice(7));return;}                           /* anything else (in-page anchors etc.) — leave the view alone */}
+/* ============ platform license layer ============ */
+const CFG = window.HANDOFF_CONFIG || {};
+const API = (CFG.BACKEND_URL || '').replace(/\/+$/, '');
+const api = p => API ? API + p : p;
+const LS_LIC = 'handoff.license.v1';
+let licVal = (() => { try { return JSON.parse(localStorage.getItem(LS_LIC) || 'null'); } catch { return null; } })();
+const licToken = () => licVal && licVal.license ? licVal.license : '';
+const hasLicense = () => !!licToken();
+async function licIssue(sid) {
+  const r = await fetch(api('/api/license/issue') + '?session_id=' + encodeURIComponent(sid));
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Issue failed');
+  licVal = d; localStorage.setItem(LS_LIC, JSON.stringify(d));
+  state.plan = 'pro'; save(); location.replace(baseURL());
+}
+let licTimer = null;
+async function licRefresh() {
+  if (!hasLicense()) return;
+  try {
+    const r = await fetch(api('/license/refresh'), { headers: { Authorization: 'Bearer ' + licToken() } });
+    if (r.ok) {
+      const d = await r.json();
+      if (d.license) { licVal = d; localStorage.setItem(LS_LIC, JSON.stringify(d)); state.plan = 'pro'; }
+      else { state.plan = 'free'; }
+    } else if (r.status === 402 || r.status === 401) {
+      localStorage.removeItem(LS_LIC); licVal = null; state.plan = 'free'; save(); route();
+    }
+  } catch { /* offline: keep current plan until next refresh */ }
+  save();
+}
+function scheduleRefresh() { clearInterval(licTimer); if (hasLicense()) licTimer = setInterval(licRefresh, 6 * 3600 * 1000); }
+async function platformCheckout() {
+  try {
+    const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const d = await r.json();
+    if (d.url) top.location.href = d.url; else { toast(d.error || 'Checkout unavailable', 'err'); }
+  } catch { toast('Checkout backend unreachable', 'err'); }
+}
+/* ============ boot ============ */
+(function(){
+  try{const sp=new URLSearchParams(location.search);
+    if(sp.get('licensed')==='1'&&sp.get('session_id')){licIssue(sp.get('session_id')).catch(()=>{location.replace(baseURL());});}
+    else if(sp.get('canceled')==='1'){sp.delete('canceled');
+      const q=sp.toString();history.replaceState(null,'',location.pathname+(q?'?'+q:''));}}catch(e){}
+  licRefresh().then(scheduleRefresh).catch(scheduleRefresh);
+const fi=document.createElement('input');fi.type='file';fi.accept='application/json';
+  fi.style.cssText='position:fixed;opacity:0;width:1px;height:1px';fi.id='importFile';
+  document.body.appendChild(fi);
+  fi.addEventListener('change',()=>{const f=fi.files&&fi.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=()=>{try{const d=JSON.parse(r.result);                                             if(!d||!Array.isArray(d.portals))throw new Error('bad');
+      state=Object.assign(freshState(),d);save();route();
+      toast('Studio imported — '+d.portals.length+' portal'+(d.portals.length===1?'':'s')+'.');}
+      catch(err){toast('That file doesn\u2019t look like a Handoff export.','err');}};
+    r.readAsText(f);fi.value='';});
+  route();                                                                                  window.addEventListener('hashchange',route);
+})();
+</script>
+</body>
+</html>  
