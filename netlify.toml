@@ -1,4 +1,4 @@
 [build]
   base = "frontend"
   command = "node inject-config.js"
-  publish = "frontend"
+  publish = "."
