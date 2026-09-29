@@ -1,0 +1,1 @@
+window.HANDOFF_CONFIG = { BACKEND_URL: "" };

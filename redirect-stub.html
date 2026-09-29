@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Handoff</title>
+<style>
+  body{margin:0;font:16px Georgia,serif;background:#F5F1E8;color:#221D14;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center}
+  main{padding:32px}
+  a{color:#8A2E1D}
+</style>
+<meta http-equiv="refresh" content="0;url=https://handoff.retoolsoftrade.com/">
+</head>
+<body>
+<main>
+  <p>Handoff has moved to its own home.</p>
+  <p><a id="go" href="https://handoff.retoolsoftrade.com/">Continue to Handoff &rarr;</a></p>
+  <script>
+    (function () {
+      // Preserve deep links: #p=<code> portal pages carry their data,
+      // so forward them untouched to the new domain.
+      var to = 'https://handoff.retoolsoftrade.com/' + location.search + location.hash;
+      var meta = document.querySelector('meta[http-equiv="refresh"]');
+      if (meta) meta.setAttribute('content', '0;url=' + to);
+      document.getElementById('go').href = to;
+    })();
+  </script>
+  <noscript><p><a href="https://handoff.retoolsoftrade.com/">Open Handoff</a></p></noscript>
+</main>
+</body>
+</html>
