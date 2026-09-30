@@ -95,7 +95,7 @@ app.get('/healthz', (req, res) => res.json({ ok: true, service: 'handoff-api' })
 app.post('/api/checkout', async (req, res) => {
   try {
     const origin = (req.headers.origin || '').replace(/\/+$/, '');
-    const base = SITE_URL || origin || '';
+    const base = origin || SITE_URL || '';
     if (!base) return res.status(400).json({ error: 'No SITE_URL and no Origin header' });
     const email = (req.body && typeof req.body.email === 'string' && req.body.email.includes('@')) ? req.body.email.trim() : undefined;
     const session = await stripe.checkout.sessions.create({
