@@ -266,9 +266,9 @@ const $$=(s,r=document)=>[...r.querySelectorAll(s)];                            
 esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const app=document.getElementById('app');
 function refreshIcons(){try{window.lucide&&lucide.createIcons();}catch(e){}}
-function toast(msg,kind){const
+function toast(msg,kind,ms){const
 r=$('#toasts'),t=document.createElement('div');t.className='toast'+(kind?'                '+kind:'');t.textContent=msg;r.appendChild(t);
-  requestAnimationFrame(()=>t.classList.add('on'));setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300);},2800);}                                                       async function copyText(txt){try{await navigator.clipboard.writeText(txt);return true;}                                                                                      catch(e){try{const
+  requestAnimationFrame(()=>t.classList.add('on'));setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300);},ms||2800);}                                                       async function copyText(txt){try{await navigator.clipboard.writeText(txt);return true;}                                                                                      catch(e){try{const
 ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();const
 ok=document.execCommand('copy');ta.remove();return ok;}catch(e2){return false;}}}         /* stamp sound: a soft "thunk" synthesized on the fly — no assets */
 let AC=null;                                                                              function thunk(){try{
@@ -801,9 +801,20 @@ let licVal = (() => { try { return JSON.parse(localStorage.getItem(LS_LIC) || 'n
 const licToken = () => licVal && licVal.license ? licVal.license : '';
 const hasLicense = () => !!licToken();
 async function licIssue(sid) {
-  const r = await fetch(api('/api/license/issue') + '?session_id=' + encodeURIComponent(sid));
-  const d = await r.json();
-  if (!r.ok) throw new Error(d.error || 'Issue failed');
+  const url = api('/api/license/issue') + '?session_id=' + encodeURIComponent(sid);
+  let r = null, lastErr = '';
+  for (let i = 0; i < 6; i++) {
+    try {
+      r = await fetch(url);
+      if (r.status !== 502 && r.status !== 503 && r.status !== 504) break;
+      lastErr = 'backend waking up (HTTP ' + r.status + ')';
+    } catch (e) { lastErr = 'backend unreachable'; r = null; }
+    if (i < 5) { toast('Waking the license server\u2026 this can take a minute.'); await new Promise(res => setTimeout(res, 5000)); }
+  }
+  if (!r) throw new Error(lastErr);
+  let d = {};
+  try { d = await r.json(); } catch {}
+  if (!r.ok) throw new Error(d.error || ('issue failed (HTTP ' + r.status + ')'));
   licVal = d; localStorage.setItem(LS_LIC, JSON.stringify(d));
   state.plan = 'pro'; save(); location.replace(baseURL());
 }
@@ -847,7 +858,7 @@ async function platformCheckout() {
 /* ============ boot ============ */
 (function(){
   try{const sp=new URLSearchParams(location.search);
-    if(sp.get('licensed')==='1'&&sp.get('session_id')){licIssue(sp.get('session_id')).catch(()=>{location.replace(baseURL());});}
+    if(sp.get('licensed')==='1'&&sp.get('session_id')){licIssue(sp.get('session_id')).catch(err=>{toast('Payment verified, but unlock failed: '+err.message+'. Leave this tab open and refresh in a minute.','err',15000);});}
     else if(sp.get('canceled')==='1'){sp.delete('canceled');
       const q=sp.toString();history.replaceState(null,'',location.pathname+(q?'?'+q:''));}}catch(e){}
   licRefresh().then(scheduleRefresh).catch(scheduleRefresh);
