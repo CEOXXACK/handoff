@@ -168,6 +168,7 @@ app.post('/api/checkout/setup', async (req, res) => {
       success_url: `${base}/?setup=1&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/?canceled=1`,
       customer_email: email,
+      managed_payments: { enabled: false },
       metadata: biz ? { biz } : {},
     });
     console.log(`[create-setup] session=${session.id} email=${email || 'n/a'} biz=${biz || 'n/a'}`);
