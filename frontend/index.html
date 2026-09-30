@@ -438,7 +438,7 @@ const TPL={
 function topbarApp(){return `<header class="top noprint"><div class="wrap top-in">
   <a class="wordmark" href="#/"><span class="wm-mark">H</span>Handoff</a>
   <span class="plan-chip mono-label">${state.plan==='pro'?'Pro plan':'Free ·              '+activeCount()+'/2 active'}</span>
-  <nav class="top-nav">                                                                       ${state.plan!=='pro'?`<a class="nav-a pro" ${state.checkout?'href="'+esc(state.checkout)+'" target="_blank" rel="noopener"':'href="#/pro" data-action="pro"'} target="_blank" rel="noopener">Go
+  <nav class="top-nav">                                                                       ${state.plan!=='pro'?`<a class="nav-a pro" href="#/pro" data-action="pro">Go
 Pro</a>`:''}                                                                             <button class="nav-a" data-action="settings">Settings</button>
     <a class="btn btn-green sm" href="#/new"><i data-lucide="plus"></i>New                portal</a>
   </nav></div></header>`;}
@@ -509,9 +509,7 @@ class="t-price">$15<span> / month</span></div>
           <li><i data-lucide="check"></i>Remove the Handoff mark entirely</li>
           <li><i data-lucide="check"></i>Any brand color</li>                                       <li><i data-lucide="check"></i>Priority email support</li>                                <li><i data-lucide="check"></i>Every new feature, first</li>
         </ul>
-        <a class="btn wide"
-style="background:var(--paper);color:var(--ink);border-color:var(--paper)"
-${state.checkout?'href="'+esc(state.checkout)+'" target="_blank" rel="noopener"':'href="#/pro" data-action="pro"'} target="_blank" rel="noopener">Go Pro — $15/mo</a></div>
+        <a class="btn wide" style="background:var(--paper);color:var(--ink);border-color:var(--paper)" href="#/pro" data-action="pro">Go Pro — $15/mo</a></div>
     </div></div></section>
   <section class="sect" id="faq"><div class="wrap">
     <div class="sec-label mono-label">§ 04 · Fair questions</div>
@@ -602,8 +600,7 @@ function renderBuilder(id){
     draft=JSON.parse(JSON.stringify(p.data));}                                              else draft=defaultDraft();                                                                const banner=(!editing&&state.plan!=='pro'&&activeCount()>=2)
     ?`<div class="m-note-banner"><span class="mono-label"
 style="color:var(--verm)">Free plan full — ${activeCount()}/2 active
-portals.</span><a class="tlink" ${state.checkout?'href="'+esc(state.checkout)+'" target="_blank" rel="noopener"':'href="#/pro" data-action="pro"'} target="_blank"
-rel="noopener">Go Pro</a><span
+portals.</span><a class="tlink" href="#/pro" data-action="pro">Go Pro</a><span
 class="mono-label" style="color:var(--ink3)">or archive one in the
 studio</span></div>`:'';
   app.innerHTML=`<div class="view">${topbarApp()}
@@ -642,8 +639,7 @@ date</label><input id="f-due" data-k="due" type="date"
 value="${esc(draft.due||'')}"></div>
           <div class="field"><label class="mono-label">Brand color</label><div
 class="swatches" id="swatches">${swatchesHTML()}</div></div>                                      </div>                                                                                    <div class="fsec"><span class="mono-label">03 · The                               deliverables</span></div>                                                                         <div id="drows"></div>                                                                    <div class="limit-note" id="limitNote" hidden>Free plan packs 5 deliverables
-per portal — <a class="tlink" ${state.checkout?'href="'+esc(state.checkout)+'" target="_blank" rel="noopener"':'href="#/pro" data-action="pro"'} target="_blank"
-rel="noopener">go Pro</a>        for unlimited.</div>
+per portal — <a class="tlink" href="#/pro" data-action="pro">go Pro</a>        for unlimited.</div>
         <button type="button" class="btn btn-ghost sm" data-action="add-item"><i          data-lucide="plus"></i>Add deliverable</button>
         <p class="ferr" id="errItems" hidden>Give at least one deliverable a              title.</p>
         <div class="fsec"><span class="mono-label">04 · The settlement</span></div>               <div class="f-grid">
@@ -731,10 +727,7 @@ data-lucide="x"></i></button></div>                                             
 data-lucide="check"></i>${f}</li>`).join('')}</ul>                                            ${hasLicense()
       ?`<p class="fine" style="text-transform:none;letter-spacing:.02em;color:var(--ink2)">Pro is active on this browser${licVal&&licVal.email?' — '+esc(licVal.email):''}. Manage billing anytime via Settings.</p>`
       :`<a class="btn btn-green wide" data-action="pro" href="#/pro">Continue to secure checkout — $15/mo</a>`}
-    <button class="btn btn-line wide" data-action="simulate"
-style="margin-top:12px">Test-drive Pro locally</button>                         <p class="fine"
-style="margin-top:22px;text-transform:none;letter-spacing:.02em">Self-serve for studios: after subscribing, use Settings to point
-Handoff checkout at your own Payment Link instead.</p>`);}                                   function openSettings(){
+    <p class="fine" style="margin-top:22px;text-transform:none;letter-spacing:.02em">Self-serve for studios: after subscribing, use your own Payment Link for client invoices.</p>`);}                                   function openSettings(){
   modal(`<div class="m-top"><span class="mono-label">Studio settings</span><button
 class="ibtn" data-action="close" aria-label="Close"><i
 data-lucide="x"></i></button></div>
@@ -744,8 +737,7 @@ name — pre-fills new portals</label><input data-k="sbiz"
 value="${esc(state.biz)}"></div>                                                              <div class="field"><label class="mono-label">Your email — acceptance notices
 arrive here</label><input data-k="semail" type="email"                                    value="${esc(state.email)}"></div>
     <div class="field"><label class="mono-label">Your payment link — shown to your        clients</label><input data-k="spay" placeholder="https://your-payment-link\u2026"
-value="${esc(state.payLink)}"></div>                                                          <div class="field"><label class="mono-label">Handoff checkout link — your Stripe
-$15/mo Payment Link</label><input data-k="sck"                                            placeholder="https://buy.stripe.com/\u2026" value="${esc(state.checkout)}"></div>
+value="${esc(state.payLink)}"></div>
     <div class="m-row">                                                                         <button class="btn" data-action="save-settings">Save defaults</button>                    <button class="btn btn-line" data-action="export">Export studio</button>
       <button class="btn btn-line" data-action="import">Import</button>
       <button class="btn btn-ghost" data-action="wipe">Erase everything</button>              </div>
@@ -773,12 +765,10 @@ n.offsetWidth;n.classList.add('shake');}return;}
   'pane':el=>{const fp=$('#formPane'),pp=$('#pvPane');if(!fp)return;
     const toPrev=el.dataset.p==='prev';fp.classList.toggle('off',toPrev);pp.classList.toggle('on',toPrev);
     $$('.m-toggle .btn').forEach(b=>b.classList.toggle('on',b===el));},                     'pro':()=>{platformCheckout();},
-  'save-ck':()=>{const n=$('[data-k="ck"]');const v=n?n.value.trim():'';                      if(!v){toast('Paste your Stripe Payment Link first.','err');return;}
-    state.checkout=v;save();closeModal();setTimeout(openUpgrade,200);toast('Checkout connected.');},
-  'simulate':()=>{state.plan='pro';save();closeModal();route();                               toast('Pro unlocked — local test only. Real buyers unlock via your Stripe link.');},                                                                                  'portal':async()=>{try{const r=await fetch(api('/api/portal'),{method:'POST',headers:{Authorization:'Bearer '+licToken()}});const d=await r.json();if(d.url)window.open(d.url,'_blank','noopener');else toast(d.error||'Portal unavailable','err');}catch{toast('Billing portal unreachable','err');}},
+  'portal':async()=>{try{const r=await fetch(api('/api/portal'),{method:'POST',headers:{Authorization:'Bearer '+licToken()}});const d=await r.json();if(d.url)window.open(d.url,'_blank','noopener');else toast(d.error||'Portal unavailable','err');}catch{toast('Billing portal unreachable','err');}},
   'settings':()=>openSettings(),
   'save-settings':()=>{const g=k=>{const n=$('[data-k="'+k+'"]');return n?n.value.trim():'';};
-    state.biz=g('sbiz');state.email=g('semail');state.payLink=g('spay');state.checkout=g('sck');
+    state.biz=g('sbiz');state.email=g('semail');state.payLink=g('spay');state.checkout='';
     save();closeModal();route();toast('Defaults saved.');},                                 'export':()=>{const blob=new
 Blob([JSON.stringify(state,null,2)],{type:'application/json'});                               const
 a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='handoff-studio.json';
