@@ -823,12 +823,26 @@ async function licRefresh() {
   save();
 }
 function scheduleRefresh() { clearInterval(licTimer); if (hasLicense()) licTimer = setInterval(licRefresh, 6 * 3600 * 1000); }
+let ckBusy = false;
 async function platformCheckout() {
+  if (ckBusy) return; ckBusy = true;
+  toast('Connecting to secure checkout\u2026 first load after idle can take up to a minute.');
   try {
-    const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 120000);
+    const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}', signal: ctl.signal });
+    clearTimeout(to);
     const d = await r.json();
-    if (d.url) top.location.href = d.url; else { toast(d.error || 'Checkout unavailable', 'err'); }
-  } catch { toast('Checkout backend unreachable', 'err'); }
+    if (d.url) { top.location.href = d.url; return; }
+    toast(d.error || 'Checkout unavailable \u2014 try again', 'err');
+  } catch {
+    toast('Checkout is slow to wake \u2014 retrying once\u2026');
+    try {
+      const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const d = await r.json();
+      if (d.url) { top.location.href = d.url; return; }
+    } catch {}
+    toast('Could not start checkout. Please try again in a minute.', 'err');
+  } finally { ckBusy = false; }
 }
 /* ============ boot ============ */
 (function(){
