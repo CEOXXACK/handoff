@@ -173,8 +173,8 @@ app.post('/api/checkout/setup', async (req, res) => {
     console.log(`[create-setup] session=${session.id} email=${email || 'n/a'} biz=${biz || 'n/a'}`);
     res.json({ url: session.url });
   } catch (e) {
-    console.error('[create-setup]', e.message);
-    res.status(500).json({ error: 'Could not start setup checkout' });
+    console.error('[create-setup]', e.message, e.raw && e.raw.message ? '| raw: ' + e.raw.message : '', e.type || '');
+    res.status(500).json({ error: 'Could not start setup checkout', detail: e.message });
   }
 });
 
