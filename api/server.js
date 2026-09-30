@@ -129,6 +129,55 @@ app.post('/api/checkout', async (req, res) => {
   }
 });
 
+/* One-time "Done-for-you setup" upsell checkout — inline payment, no price object needed. */
+const SETUP_PRICE = 9900; // $99.00
+app.post('/api/checkout/setup', async (req, res) => {
+  try {
+    const origin = (req.headers.origin || '').replace(/\/+$/, '');
+    let base = origin || SITE_URL || '';
+    const bodyBase = req.body && typeof req.body.base === 'string' ? req.body.base.trim() : '';
+    if (bodyBase) {
+      try {
+        const u = new URL(bodyBase);
+        const isAllowed = (o) => {
+          if (ALLOWED_ORIGIN === '*') return true;
+          if (ALLOWED_ORIGIN.split(',').map(s => s.trim()).includes(o)) return true;
+          if (/^https:\/\/[a-z0-9-]+\.github\.io$/.test(o)) return true;
+          if (o === 'https://handoff2.netlify.app') return true;
+          return false;
+        };
+        if (isAllowed(u.origin)) base = u.origin + u.pathname.replace(/index\.html$/i, '').replace(/\/+$/, '');
+      } catch {}
+    }
+    if (!base) return res.status(400).json({ error: 'No SITE_URL and no Origin header' });
+    const email = (req.body && typeof req.body.email === 'string' && req.body.email.includes('@')) ? req.body.email.trim() : undefined;
+    const biz = (req.body && typeof req.body.biz === 'string') ? req.body.biz.trim().slice(0, 120) : undefined;
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: [{
+        quantity: 1,
+        price_data: {
+          currency: 'usd',
+          unit_amount: SETUP_PRICE,
+          product_data: {
+            name: 'Handoff — Done-for-you setup',
+            description: 'We customize Handoff for your business: your logo, colors, and defaults configured for you.',
+          },
+        },
+      }],
+      success_url: `${base}/?setup=1&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${base}/?canceled=1`,
+      customer_email: email,
+      metadata: biz ? { biz } : {},
+    });
+    console.log(`[create-setup] session=${session.id} email=${email || 'n/a'} biz=${biz || 'n/a'}`);
+    res.json({ url: session.url });
+  } catch (e) {
+    console.error('[create-setup]', e.message);
+    res.status(500).json({ error: 'Could not start setup checkout' });
+  }
+});
+
 /* Exchange a completed Checkout session for a signed license. */
 app.get('/api/license/issue', async (req, res) => {
   const { session_id: sid } = req.query;
@@ -176,6 +225,31 @@ app.get('/api/license/refresh', async (req, res) => {
   } catch (e) {
     console.error('[license-refresh]', e.message);
     res.status(500).json({ error: 'refresh failed' });
+  }
+});
+
+/* Optionally-signed setup purchase proof: session must be a paid setup session. */
+app.get('/api/setup/issue', async (req, res) => {
+  const { session_id: sid } = req.query;
+  if (!sid) return res.status(400).json({ error: 'session_id required' });
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sid);
+    if (!session || session.payment_status !== 'paid') {
+      return res.status(402).json({ error: 'Session not paid' });
+    }
+    if (!session.amount_total || session.amount_total !== SETUP_PRICE) {
+      return res.status(402).json({ error: 'Not a setup session' });
+    }
+    const email = (session.customer_details && session.customer_details.email) || '';
+    const cert = signLicense({
+      v: 1, setup: true, sub: 'setup_' + sid, email,
+      iat: Date.now(), exp: Date.now() + 3650 * 864e5,
+    });
+    console.log(`[setup-issue] session=${sid} email=${email}`);
+    res.json({ setup: cert });
+  } catch (e) {
+    console.error('[setup-issue]', e.message);
+    res.status(500).json({ error: 'Verification failed' });
   }
 });
 

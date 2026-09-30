@@ -339,7 +339,7 @@ ng=AC.createGain(),f=AC.createBiquadFilter();n.buffer=buf;ng.gain.value=.15;f.ty
 /* ============ state ============ */
 const LS='handoff.studio.v1';
 const
-freshState=()=>({plan:'free',biz:'',email:'',payLink:'',checkout:'',portals:[]});
+freshState=()=>({plan:'free',biz:'',email:'',payLink:'',checkout:'',portals:[],setup:0});
 let state=(function(){try{const
 s=JSON.parse(localStorage.getItem(LS));if(s&&Array.isArray(s.portals))return Object.assign(freshState(),s);}catch(e){}return freshState();})();
 function save(){try{localStorage.setItem(LS,JSON.stringify(state));}catch(e){}}
@@ -781,6 +781,9 @@ data-lucide="x"></i></button></div>                                             
 data-lucide="check"></i>${f}</li>`).join('')}</ul>                                            ${hasLicense()
       ?`<p class="fine" style="text-transform:none;letter-spacing:.02em;color:var(--ink2)">Pro is active on this browser${licVal&&licVal.email?' — '+esc(licVal.email):''}. Manage billing anytime via Settings.</p>`
       :`<a class="btn btn-green wide" data-action="pro" href="#/pro">Continue to secure checkout — $15/mo</a>`}
+    ${hasSetup()
+      ?`<div style="margin-top:18px;border:1px solid var(--line2);border-radius:3px;padding:14px 16px;background:var(--paper2)"><span class="mono-label" style="color:var(--green)">✓ Done-for-you setup purchased</span><p class="fine" style="margin-top:6px;text-transform:none;letter-spacing:.02em">We'll be in touch at ${esc(state.email||licVal&&licVal.email||'your email')} to gather your logo, colors and defaults.</p></div>`
+      :`<div style="margin-top:18px;border:1px solid var(--line2);border-radius:3px;padding:14px 16px;background:var(--paper2)"><span class="mono-label">Add-on — Done-for-you setup</span><p class="fine" style="margin:6px 0 12px;text-transform:none;letter-spacing:.02em;color:var(--ink2)">We customize Handoff for your business: logo, brand color, defaults, and your first portal built with you. One-time $99.</p><a class="btn wide" data-action="setup-buy" href="#/setup">Add Done-for-you setup — $99 once</a></div>`}
     <p class="fine" style="margin-top:22px;text-transform:none;letter-spacing:.02em">Self-serve for studios: after subscribing, use your own Payment Link for client invoices.</p>`);}                                   function openSettings(){
   modal(`<div class="m-top"><span class="mono-label">Studio settings</span><button
 class="ibtn" data-action="close" aria-label="Close"><i
@@ -797,6 +800,12 @@ value="${esc(state.payLink)}"></div>
       <button class="btn btn-ghost" data-action="wipe">Erase everything</button>              </div>
     <div class="m-row" style="margin-top:8px;align-items:center">                               <span class="mono-label" style="color:var(--ink3)">Plan:
 ${state.plan==='pro'?'Pro — thanks for backing it':'Free'}</span>                               ${hasLicense() ? `<button class="btn btn-line sm" data-action="portal">Manage subscription</button>` : (state.plan!=='pro' ? `<a class="btn btn-green sm" data-action="pro" href="#/pro">Upgrade — $15/mo</a>` : ``)}
+    </div>
+    <div class="m-row" style="margin-top:4px;align-items:center;border-top:1px dotted var(--line2);padding-top:14px">
+      <span class="mono-label" style="color:var(--ink3)">Setup: ${hasSetup()?'✓ Done-for-you — we customize Handoff for you':'Self-serve'}</span>
+      ${hasSetup()
+        ?`<a class="btn btn-line sm" href="mailto:setup@handoff.app?subject=${encodeURIComponent('Setup intake — '+(state.biz||'my business'))}&body=${encodeURIComponent('Business name: '+(state.biz||'')+'%0D%0APickup email: '+(state.email||licVal&&licVal.email||'')+'%0D%0ALogo: (attach)%0D%0ABrand color: %0D%0APayment link (if any): '+(state.payLink||'')+'%0D%0AAnything else we should know:')}">Send my details</a>`
+        :`<a class="btn btn-line sm" data-action="setup-buy" href="#/setup">Add setup — $99 once</a>`}
     </div>`);}
 /* ============ actions & routing ============ */
 const ACTIONS={
@@ -819,6 +828,7 @@ n.offsetWidth;n.classList.add('shake');}return;}
   'pane':el=>{const fp=$('#formPane'),pp=$('#pvPane');if(!fp)return;
     const toPrev=el.dataset.p==='prev';fp.classList.toggle('off',toPrev);pp.classList.toggle('on',toPrev);
     $$('.m-toggle .btn').forEach(b=>b.classList.toggle('on',b===el));},                     'pro':()=>{platformCheckout();},
+  'setup-buy':()=>{setupCheckout();},
   'portal':async()=>{try{const r=await fetch(api('/api/portal'),{method:'POST',headers:{Authorization:'Bearer '+licToken()}});const d=await r.json();if(d.url)window.open(d.url,'_blank','noopener');else toast(d.error||'Portal unavailable','err');}catch{toast('Billing portal unreachable','err');}},
   'settings':()=>openSettings(),
   'save-settings':()=>{const g=k=>{const n=$('[data-k="'+k+'"]');return n?n.value.trim():'';};
@@ -913,10 +923,49 @@ async function platformCheckout() {
     toast('Could not start checkout. Please try again in a minute.', 'err');
   } finally { ckBusy = false; }
 }
+/* ============ done-for-you setup upsell ============ */
+const LS_SETUP = 'handoff.setup.v1';
+const hasSetup = () => !!localStorage.getItem(LS_SETUP) || !!state.setup;
+const setupToken = () => localStorage.getItem(LS_SETUP) || '';
+let stBusy = false;
+async function setupCheckout() {
+  if (stBusy) return; stBusy = true;
+  toast('Connecting to secure checkout\u2026');
+  try {
+    const r = await fetch(api('/api/checkout/setup'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: location.href.split('#')[0].split('?')[0], email: state.email || undefined, biz: state.biz || undefined }) });
+    const d = await r.json();
+    if (d.url) { top.location.href = d.url; return; }
+    toast(d.error || 'Checkout unavailable \u2014 try again', 'err');
+  } catch {
+    toast('Could not start checkout. Please try again in a minute.', 'err');
+  } finally { stBusy = false; }
+}
+async function setupIssue(sid) {
+  let r = null, lastErr = '';
+  for (let i = 0; i < 6; i++) {
+    try {
+      r = await fetch(api('/api/setup/issue') + '?session_id=' + encodeURIComponent(sid));
+      if (r.status !== 502 && r.status !== 503 && r.status !== 504) break;
+      lastErr = 'backend waking up (HTTP ' + r.status + ')';
+    } catch (e) { lastErr = 'backend unreachable'; r = null; }
+    if (i < 5) { toast('Waking the license server\u2026 this can take a minute.'); await new Promise(res => setTimeout(res, 5000)); }
+  }
+  if (!r) throw new Error(lastErr);
+  let d = {};
+  try { d = await r.json(); } catch {}
+  if (!r.ok) throw new Error(d.error || ('issue failed (HTTP ' + r.status + ')'));
+  localStorage.setItem(LS_SETUP, d.setup);
+  state.setup = 1; save();
+  const sp = new URLSearchParams(location.search);
+  sp.delete('setup'); sp.delete('session_id');
+  const clean = baseURL() + (sp.toString() ? '?' + sp.toString() : '') + '#/studio';
+  location.replace(clean);
+}
 /* ============ boot ============ */
 (function(){
   try{const sp=new URLSearchParams(location.search);
     if(sp.get('licensed')==='1'&&sp.get('session_id')){licIssue(sp.get('session_id')).catch(err=>{toast('Payment verified, but unlock failed: '+err.message+'. Leave this tab open and refresh in a minute.','err',15000);});}
+    else if(sp.get('setup')==='1'&&sp.get('session_id')){setupIssue(sp.get('session_id')).catch(err=>{toast('Setup payment verified, but confirmation failed: '+err.message+'. Leave this tab open and refresh in a minute.','err',15000);});}
     else if(sp.get('canceled')==='1'){sp.delete('canceled');
       const q=sp.toString();history.replaceState(null,'',location.pathname+(q?'?'+q:''));}}catch(e){}
   licRefresh().then(scheduleRefresh).catch(scheduleRefresh);
