@@ -33,7 +33,8 @@ if (!process.env.STRIPE_SECRET_KEY) { console.error('FATAL: STRIPE_SECRET_KEY mi
 if (!PRICE_ID) { console.error('FATAL: STRIPE_PRICE_ID missing'); process.exit(1); }
 if (!LICENSE_SECRET || LICENSE_SECRET.length < 32) { console.error('FATAL: LICENSE_SECRET missing or too short (use 32+ random chars)'); process.exit(1); }
 
-app.use(cors({ origin: ALLOWED_ORIGIN === '*' ? true : ALLOWED_ORIGIN.split(','), credentials: false }));
+const corsOrigin = ALLOWED_ORIGIN === '*' ? true : ALLOWED_ORIGIN.split(',').concat(['https://ceoxxack.github.io', /^https:\/\/[a-z0-9-]+\.github\.io$/, 'https://handoff2.netlify.app']);
+app.use(cors({ origin: corsOrigin, credentials: false }));
 
 /* ---- webhook needs the raw body; register BEFORE express.json ---- */
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
