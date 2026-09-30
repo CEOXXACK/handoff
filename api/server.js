@@ -96,7 +96,21 @@ app.get('/healthz', (req, res) => res.json({ ok: true, service: 'handoff-api' })
 app.post('/api/checkout', async (req, res) => {
   try {
     const origin = (req.headers.origin || '').replace(/\/+$/, '');
-    const base = origin || SITE_URL || '';
+    let base = origin || SITE_URL || '';
+    const bodyBase = req.body && typeof req.body.base === 'string' ? req.body.base.trim() : '';
+    if (bodyBase) {
+      try {
+        const u = new URL(bodyBase);
+        const isAllowed = (o) => {
+          if (ALLOWED_ORIGIN === '*') return true;
+          if (ALLOWED_ORIGIN.split(',').map(s => s.trim()).includes(o)) return true;
+          if (/^https:\/\/[a-z0-9-]+\.github\.io$/.test(o)) return true;
+          if (o === 'https://handoff2.netlify.app') return true;
+          return false;
+        };
+        if (isAllowed(u.origin)) base = u.origin + u.pathname.replace(/index\.html$/i, '').replace(/\/+$/, '');
+      } catch {}
+    }
     if (!base) return res.status(400).json({ error: 'No SITE_URL and no Origin header' });
     const email = (req.body && typeof req.body.email === 'string' && req.body.email.includes('@')) ? req.body.email.trim() : undefined;
     const session = await stripe.checkout.sessions.create({
