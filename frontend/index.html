@@ -268,8 +268,7 @@ const app=document.getElementById('app');
 function refreshIcons(){try{window.lucide&&lucide.createIcons();}catch(e){}}
 function toast(msg,kind){const
 r=$('#toasts'),t=document.createElement('div');t.className='toast'+(kind?'                '+kind:'');t.textContent=msg;r.appendChild(t);
-  requestAnimationFrame(()=>t.classList.add('on'));setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300);},2800);}                                                       async function copyText(txt){try{await navigator.clipboard.writeText(txt);return
-true;}                                                                                      catch(e){try{const
+  requestAnimationFrame(()=>t.classList.add('on'));setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300);},2800);}                                                       async function copyText(txt){try{await navigator.clipboard.writeText(txt);return true;}                                                                                      catch(e){try{const
 ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();const
 ok=document.execCommand('copy');ta.remove();return ok;}catch(e2){return false;}}}         /* stamp sound: a soft "thunk" synthesized on the fly — no assets */
 let AC=null;                                                                              function thunk(){try{
@@ -288,8 +287,7 @@ const LS='handoff.studio.v1';
 const
 freshState=()=>({plan:'free',biz:'',email:'',payLink:'',checkout:'',portals:[]});
 let state=(function(){try{const
-s=JSON.parse(localStorage.getItem(LS));if(s&&Array.isArray(s.portals))return
-Object.assign(freshState(),s);}catch(e){}return freshState();})();
+s=JSON.parse(localStorage.getItem(LS));if(s&&Array.isArray(s.portals))return Object.assign(freshState(),s);}catch(e){}return freshState();})();
 function save(){try{localStorage.setItem(LS,JSON.stringify(state));}catch(e){}}
 const activeCount=()=>state.portals.filter(p=>!p.archived).length;
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);              const SYM={USD:'$',EUR:'\u20AC',GBP:'\u00A3',CHF:'CHF '};
@@ -334,8 +332,7 @@ async function readCode(code){
   return unpackData(JSON.parse(new TextDecoder().decode(body)));}                         /* ============ approvals (per-portal, on the reader's device) ============ */
 const accKey=c=>'hnd.acc.'+hash(c);
 function getAcc(c){try{const
-v=JSON.parse(localStorage.getItem(accKey(c)));if(v&&v.items)return
-v;}catch(e){}return{items:{}};}                                                           function
+v=JSON.parse(localStorage.getItem(accKey(c)));if(v&&v.items)return v;}catch(e){}return{items:{}};}                                                           function
 storeAcc(c,v){try{localStorage.setItem(accKey(c),JSON.stringify(v));}catch(e){}}          const readyIdx=d=>(d.items||[]).map((it,i)=>it.s?i:-1).filter(i=>i>=0);
 /* ============ context registry for interactive portals ============ */                  const CTXREG={};let ctxN=0;
 function regCtx(o){o.token='c'+(++ctxN);CTXREG[o.token]=o;return o.token;}
@@ -780,8 +777,7 @@ n.offsetWidth;n.classList.add('shake');}return;}
     state.checkout=v;save();closeModal();setTimeout(openUpgrade,200);toast('Checkout connected.');},
   'simulate':()=>{state.plan='pro';save();closeModal();route();                               toast('Pro unlocked — local test only. Real buyers unlock via your Stripe link.');},                                                                                  'portal':async()=>{try{const r=await fetch(api('/api/portal'),{method:'POST',headers:{Authorization:'Bearer '+licToken()}});const d=await r.json();if(d.url)window.open(d.url,'_blank','noopener');else toast(d.error||'Portal unavailable','err');}catch{toast('Billing portal unreachable','err');}},
   'settings':()=>openSettings(),
-  'save-settings':()=>{const g=k=>{const n=$('[data-k="'+k+'"]');return
-n?n.value.trim():'';};
+  'save-settings':()=>{const g=k=>{const n=$('[data-k="'+k+'"]');return n?n.value.trim():'';};
     state.biz=g('sbiz');state.email=g('semail');state.payLink=g('spay');state.checkout=g('sck');
     save();closeModal();route();toast('Defaults saved.');},                                 'export':()=>{const blob=new
 Blob([JSON.stringify(state,null,2)],{type:'application/json'});                               const
