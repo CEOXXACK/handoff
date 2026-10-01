@@ -2,3 +2,51 @@
   base = "frontend"
   command = "node inject-config.js"
   publish = "."
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# API host: this site (handoff2.netlify.app) serves the functions behind clean paths.
+# The app itself is served from GitHub Pages and reaches these via cross-origin fetches
+# (every function answers CORS + OPTIONS preflight itself).
+
+[[redirects]]
+  from = "/api/checkout/setup"
+  to = "/.netlify/functions/checkout-setup"
+  status = 200
+
+[[redirects]]
+  from = "/api/checkout"
+  to = "/.netlify/functions/checkout"
+  status = 200
+
+[[redirects]]
+  from = "/api/license/issue"
+  to = "/.netlify/functions/license-issue"
+  status = 200
+
+[[redirects]]
+  from = "/api/license/refresh"
+  to = "/.netlify/functions/license-refresh"
+  status = 200
+
+[[redirects]]
+  from = "/api/setup/issue"
+  to = "/.netlify/functions/setup-issue"
+  status = 200
+
+[[redirects]]
+  from = "/api/portal"
+  to = "/.netlify/functions/portal"
+  status = 200
+
+[[redirects]]
+  from = "/webhook"
+  to = "/.netlify/functions/webhook"
+  status = 200
+
+[[redirects]]
+  from = "/healthz"
+  to = "/.netlify/functions/healthz"
+  status = 200

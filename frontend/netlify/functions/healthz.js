@@ -1,0 +1,2 @@
+const { ok, fail, handle, stripe } = require('./common');
+exports.handler = async (event) => handle(event, async () => ok({ ok: true, ts: new Date().toISOString(), service: 'handoff-api (netlify fn)' }));
