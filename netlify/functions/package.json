@@ -1,0 +1,9 @@
+{
+  "name": "handoff-functions",
+  "version": "1.0.0",
+  "description": "Handoff API as Netlify Functions (ported from api/server.js)",
+  "main": "common.js",
+  "dependencies": {
+    "stripe": "^22.6.2"
+  }
+}
