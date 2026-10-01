@@ -113,3 +113,8 @@ since ownership is only claimed once and revocation is live; `metadata.revoked` 
 authoritative (refund wins over any cached state); go-live step 2 needs no extra env.
 Env cutover on handoff2 done 2026-10-01 (all 5 vars set; test-mode keys); Stripe
 webhook endpoint recreated `we_1ULmHUP11tr0MdT3FAeCoDxc` (4 events) pointing at prod.
+Full 4242 checkout E2E passed on prod 2026-10-01: pay → success redirect → one-shot
+redeem (server-side stamp; `paid:true`) → replay 200 → different-`pc` 409 → refund →
+`/api/portal/paid` flips `paid:false` in ~3 s via webhook, `metadata.revoked=1`.
+E2E quirks: Stripe Checkout pre-checks Link's "save my info" (makes phone required,
+payment silently stuck) and card fields live behind `button[data-testid="card-accordion-item-button"]`.
