@@ -116,5 +116,11 @@ webhook endpoint recreated `we_1ULmHUP11tr0MdT3FAeCoDxc` (4 events) pointing at 
 Full 4242 checkout E2E passed on prod 2026-10-01: pay → success redirect → one-shot
 redeem (server-side stamp; `paid:true`) → replay 200 → different-`pc` 409 → refund →
 `/api/portal/paid` flips `paid:false` in ~3 s via webhook, `metadata.revoked=1`.
-E2E quirks: Stripe Checkout pre-checks Link's "save my info" (makes phone required,
-payment silently stuck) and card fields live behind `button[data-testid="card-accordion-item-button"]`.
+E2E quirks: card fields live behind `button[data-testid="card-accordion-item-button"]`.
+Stripe Link was disabled 2026-10-01 via the Payment Method Configurations API (same
+toggle as Dashboard → Settings → Payment methods) on the test-mode default config
+`pmc_1U5iclP11tr0MdT3wgOcYFtN`: `POST /v1/payment_method_configurations/:id -d
+"link[display_preference][preference]=off"`. Its pre-checked "Save my information"
+box had been making phone number required with no hint — the payment silently stuck.
+Verified gone from a fresh checkout (no checkbox/phone/Link text); **repeat this on
+the default LIVE-mode config at go-live**.
