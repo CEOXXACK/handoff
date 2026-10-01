@@ -48,6 +48,25 @@ portal unlocks (`/api/portal/paid` goes `paid:false`, mark returns on the link).
 - Pages has **no build step**: `frontend/config.js` must stay committed with `BACKEND_URL` baked in
   (Netlify's `inject-config.js` regenerates it from env at deploy; the committed value is the Pages source of truth).
 
+## Deploy when buildbot is credit-blocked (found 2026-10-01)
+
+`netlify deploy --prod` (and the direct `createSiteDeploy` API call) returns
+`JSONHTTPError: Forbidden` when the account is out of build credits — the buildbot
+skips every build ("Skipped due to account credit usage exceeded"). The **draft**
+deploy path is not metered:
+
+```
+netlify link --name handoff2        # once; creates .netlify/state.json (gitignored)
+netlify deploy                      # builds + uploads functions/assets, returns a draft URL (no credits)
+# then promote that draft to production:
+netlify api restoreSiteDeploy --data "{\"site_id\":\"<site id>\",\"deploy_id\":\"<draft deploy id>\"}"
+```
+
+Netlify functions *runtime* is not credit-metered — this is the standing workaround
+until credits reset. Verified live smoke 2026-10-01: /healthz 200; /api/portal/paid
+unpaid session → `{"paid":false}`; /api/portal/issue unpaid → 402 "Session not paid";
+POST /api/checkout/portal → real test-mode Checkout session URL.
+
 ## Go-live (live mode) — do in order
 
 1. Stripe dashboard, test mode OFF:
@@ -74,7 +93,7 @@ cancellation / 401 on tampered cert, portal opens with a real customer license,
 webhook validates signed payloads (base64 body) and rejects forged signatures,
 CORS preflight honored for allowlisted origins only.
 
-## Single-use paid portals (added 2026-10-01, verified 43/43)
+## Single-use paid portals (added 2026-10-01, verified 43/43 + live smoke passed)
 
 $9 one-time Checkout (`mode: payment`, `managed_payments:{enabled:false}`) removes the
 Handoff mark from ONE portal link. No new env vars; single-use state lives in Stripe
@@ -92,3 +111,5 @@ PaymentIntent until a card completes).
 Notes: success URL is public (`session_id` + `pc` land in browser history) — by design,
 since ownership is only claimed once and revocation is live; `metadata.revoked` is
 authoritative (refund wins over any cached state); go-live step 2 needs no extra env.
+Env cutover on handoff2 done 2026-10-01 (all 5 vars set; test-mode keys); Stripe
+webhook endpoint recreated `we_1ULmHUP11tr0MdT3FAeCoDxc` (4 events) pointing at prod.

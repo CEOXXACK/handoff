@@ -2,3 +2,5 @@
 config.js.bak
 # local
 node_modules/
+# Local Netlify folder
+.netlify
