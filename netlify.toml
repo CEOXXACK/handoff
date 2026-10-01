@@ -32,6 +32,21 @@
   status = 200
 
 [[redirects]]
+  from = "/api/checkout/portal"
+  to = "/.netlify/functions/checkout-portal"
+  status = 200
+
+[[redirects]]
+  from = "/api/portal/issue"
+  to = "/.netlify/functions/portal-issue"
+  status = 200
+
+[[redirects]]
+  from = "/api/portal/paid"
+  to = "/.netlify/functions/portal-paid"
+  status = 200
+
+[[redirects]]
   from = "/api/setup/issue"
   to = "/.netlify/functions/setup-issue"
   status = 200

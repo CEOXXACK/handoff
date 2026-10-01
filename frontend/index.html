@@ -58,6 +58,7 @@ button{font-family:inherit}
 .chip.ready::before{background:var(--amber)}
 .chip.ok{color:var(--green);border-color:rgba(30,91,64,.45)}
 .chip.ok::before{background:var(--green)}
+.chip.gold{color:#7a5a1e;border-color:rgba(122,90,30,.5)}
 .chip.wip{color:var(--ink3)}
 .plan-chip{border:1px solid var(--line2);border-radius:2px;padding:5px 10px;color:var(--ink2);white-space:nowrap;font:600 10px var(--mono);letter-spacing:.1em;text-transform:uppercase}
 .ptag{display:inline-block;background:var(--verm);color:var(--paper);font:700 10px var(--mono);letter-spacing:.16em;text-transform:uppercase;padding:5px 10px;border-radius:2px;align-self:flex-start}
@@ -350,6 +351,8 @@ i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))>>>0;return h;};             
 serialOf=s=>'HND-'+(hash(s)%1679616).toString(36).toUpperCase().padStart(4,'0');
 const baseURL=()=>location.href.split('#')[0].split('?')[0];
 const shareURL=code=>baseURL()+'#p='+code;
+const shareLinkFor=p=>(p&&p.paid&&p.sid)?(baseURL()+'#p='+p.code+'&pid='+encodeURIComponent(p.sid)):(p&&p.url||shareURL(p&&p.code||''));
+async function sha256Hex(s){const b=new TextEncoder().encode(String(s));const dig=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(dig)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 const fmtDate=ts=>new
 Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});        const fmtStamp=ts=>new
 Date(ts||Date.now()).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'}).toUpperCase();
@@ -388,6 +391,10 @@ const accKey=c=>'hnd.acc.'+hash(c);
 function getAcc(c){try{const
 v=JSON.parse(localStorage.getItem(accKey(c)));if(v&&v.items)return v;}catch(e){}return{items:{}};}                                                           function
 storeAcc(c,v){try{localStorage.setItem(accKey(c),JSON.stringify(v));}catch(e){}}          const readyIdx=d=>(d.items||[]).map((it,i)=>it.s?i:-1).filter(i=>i>=0);
+/* ============ paid single-use unlocks ($9 removes the mark from one link) ========= */
+const PEND_KEY='handoff.portalPend.v1';
+function pendMap(){try{const m=JSON.parse(localStorage.getItem(PEND_KEY));if(m&&typeof m==='object')return m;}catch(e){}return{};}
+function pendSave(m){try{localStorage.setItem(PEND_KEY,JSON.stringify(m));}catch(e){}}
 /* ============ context registry for interactive portals ============ */                  const CTXREG={};let ctxN=0;
 function regCtx(o){o.token='c'+(++ctxN);CTXREG[o.token]=o;return o.token;}
 function stampHTML(brand,label,ts,anim){return `<span
@@ -450,7 +457,7 @@ class="mono-label">Settlement</span>
 class="major-slot">${stampHTML(brand,'Accepted',Math.max(...ready.map(i=>acc.items[i])),o.persist)}</div>`:'<div class="major-slot"></div>';                                                const
 accept=(allDone&&o.persist&&o.token)?acceptBarHTML(d,serial,acc,CTXREG[o.token]):'';        const noneNote=!items.length?'':(ready.length?'':`<p class="none-note">Nothing is
 marked Ready yet — the studio flips items to Ready as work lands.</p>`);                    const foot=o.mark?`<div class="sheet-foot"><span class="mono-label">No.
-${esc(serial)}</span>${d.plan==='pro'                                                         ?`<span class="mono-label" style="color:var(--ink3)">Handoff</span>`
+${esc(serial)}</span>${d.plan==='pro'||o.paid                                                          ?`<span class="mono-label" style="color:var(--ink3)">Handoff</span>`
     :`<span class="mark">Made with <a href="${baseURL()}" target="_blank"                 rel="noopener">Handoff</a> — the last link you send</span>`}</div>`:'';
   return `<div class="sheet" style="--brand:${brand}">                                        <div class="rule2"></div>
     <div class="sheet-top"><span class="mono-label">Delivery note</span><span
@@ -597,11 +604,12 @@ export it.</p></div>`;}                                                         
     const serial=serialOf(p.code||p.id),n=(p.data.items||[]).length;                          return `<article class="p-row${p.archived?' is-arch':''}">                                  <span class="p-no">${serial}</span>                                                       <div><div class="p-title">${esc(p.data.project||'Untitled project')}</div>
       <div class="p-sub">for ${esc(p.data.client||'—')} · ${n}                            item${n===1?'':'s'}</div></div>
       <span class="chip
-${p.archived?'wip':'ok'}">${p.archived?'Archived':'Live'}</span>
+${p.paid?'gold':p.archived?'wip':'ok'}">${p.paid?'Paid':p.archived?'Archived':'Live'}</span>
       <span class="p-date">${fmtDate(p.created)}</span>                                         <div class="p-acts">
-        <a class="ibtn" href="#p=${p.code}" aria-label="Open portal" title="Open          portal"><i data-lucide="eye"></i></a>
-        <button class="ibtn" data-action="copy-url"                                       data-url="${esc(p.url||shareURL(p.code))}" aria-label="Copy link" title="Copy
+        <a class="ibtn" href="#p=${p.code}${p.paid&&p.sid?'&pid='+encodeURIComponent(p.sid):''}" aria-label="Open portal" title="Open          portal"><i data-lucide="eye"></i></a>
+        <button class="ibtn" data-action="copy-url"                                       data-url="${esc(shareLinkFor(p))}" aria-label="Copy link" title="Copy
 link"><i data-lucide="copy"></i></button>
+        ${!p.paid?`<button class="ibtn" data-action="buy-portal" data-id="${p.id}" aria-label="Remove the mark — one-time $9" title="Remove the mark — one-time $9"><i data-lucide="badge-check"></i></button>`:''}
         <a class="ibtn" href="#/edit/${p.id}" aria-label="Edit" title="Edit"><i
 data-lucide="pen-line"></i></a>                                                                   <button class="ibtn" data-action="archive" data-id="${p.id}"
 aria-label="${p.archived?'Restore':'Archive'}"                                            title="${p.archived?'Restore':'Archive'}"><i
@@ -723,7 +731,9 @@ class="mono-label" style="color:var(--ink3)">live · updates as you type</span><
 $('#errItems').hidden=true;
   if(!ok)return;                                                                            if(!editing&&state.plan!=='pro'&&activeCount()>=2){openUpgrade();return;}
   const code=await makeCode(draft,state.plan);
-  if(editing){const p=state.portals.find(x=>x.id===editing);if(p)Object.assign(p,{data:draft,code,url:shareURL(code)});}
+  if(editing){const p=state.portals.find(x=>x.id===editing);
+    const stillPaid=!!(p&&p.paid&&p.code===code); /* editing produces a fresh code — the paid unlock stays with the original link */
+    if(p)Object.assign(p,{data:draft,code,url:shareURL(code),paid:stillPaid||undefined});}
   else
 state.portals.push({id:uid(),created:Date.now(),archived:false,data:draft,code,url:shareURL(code)});
   state.biz=draft.biz||state.biz;state.email=draft.email||state.email;
@@ -743,9 +753,22 @@ class="rule2"></div>
 sits on a server. If the link was cut short somewhere in transit, ask the sender to       re-copy the complete string.</p>
       <div class="sheet-foot"><span class="mono-label">Handoff</span><span                class="mark"><a href="${baseURL()}">What is Handoff?</a></span></div></div></div>`;
     refreshIcons();return;}                                                                 const acc=getAcc(code),serial=serialOf(code);
-  const ctxToken=regCtx({data,code,serial,note:'',persist:true});                           app.innerHTML=`<div class="portal-bg view">
+  let viewOpts={persist:true,mark:true,paid:false,token:'',ctx:'client'};
+  const ctxToken=regCtx({data,code,serial,note:'',persist:true});viewOpts.token=ctxToken;
+  /* paid share link (#p=<code>&pid=<session_id>): one live verification of that session */
+  let pid='';try{const hh=new URLSearchParams((location.hash||'').split('?')[1]||'');if(hh.get('pid'))pid=hh.get('pid');}catch(e){}
+  if(pid&&/^cs_(test|live)_/.test(pid)){
+    try{
+      const pc=await sha256Hex(code);
+      const r=await fetch(api('/api/portal/paid')+'?sid='+encodeURIComponent(pid)+'&pc='+encodeURIComponent(pc));
+      const d=await r.json();
+      if(d&&d.paid)viewOpts.paid=true;
+    }catch(e){}
+    try{history.replaceState(null,'',location.pathname+location.search+'#p='+code);}catch(e){}
+  }
+  app.innerHTML=`<div class="portal-bg view">
     <div class="portal-tools noprint"><button class="btn btn-ghost sm" data-action="print"><i data-lucide="printer"></i>Print / PDF</button></div>
-    ${sheetHTML(data,serial,acc,{persist:true,mark:true,token:ctxToken,ctx:'client'})}
+    ${sheetHTML(data,serial,acc,viewOpts)}
   </div>`;                                                                                  refreshIcons();}
 /* ============ modals ============ */                                                    let pendingConfirm=null;
 function modal(inner){const root=$('#modals');
@@ -761,18 +784,19 @@ data-lucide="x"></i></button></div>
     <div class="m-row"><button class="btn btn-ghost"                                      data-action="close">Cancel</button>
     <button class="btn" id="cf-go"${opt.danger?' style="background:var(--verm);border-color:var(--verm)"':''}>${esc(opt.yes||'Confirm')}</button></div>`);
   $('#cf-go').addEventListener('click',()=>{pendingConfirm=null;const o=$('#modals .overlay');
-    if(o){o.classList.remove('on');setTimeout(()=>{$('#modals').innerHTML='';},170);}res(true);});});}                                                                                       function openShare(id){const                                                              p=state.portals.find(x=>x.id===id);if(!p||!p.code)return;                                   const url=p.url||shareURL(p.code),n=(p.data.items||[]).length;
+    if(o){o.classList.remove('on');setTimeout(()=>{$('#modals').innerHTML='';},170);}res(true);});});}                                                                                       function openShare(id){const                                                              p=state.portals.find(x=>x.id===id);if(!p||!p.code)return;                                   const url=shareLinkFor(p),n=(p.data.items||[]).length;
   modal(`<div class="m-top"><span class="mono-label">Share —                              ${serialOf(p.code)}</span><button class="ibtn" data-action="close"
 aria-label="Close"><i data-lucide="x"></i></button></div>                                     <h3>One link, ready to send.</h3>
     <p class="m-body">${n} deliverable${n===1?'':'s'} · packs to ${url.length}            characters · nothing is uploaded.</p>
     <div class="share-url"><input readonly value="${esc(url)}"                            onfocus="this.select()">
       <button class="btn" data-action="copy-url" data-url="${esc(url)}"><i                data-lucide="copy"></i>Copy</button></div>
-    <div class="m-row">                                                                         <a class="btn btn-line" href="#p=${p.code}"><i data-lucide="eye"></i>Open
+    <div class="m-row">                                                                         <a class="btn btn-line" href="#p=${p.code}${p.paid&&p.sid?'&pid='+encodeURIComponent(p.sid):''}"><i data-lucide="eye"></i>Open
 portal</a>
       <a class="btn btn-ghost"
 href="mailto:${encodeURIComponent(p.data.email||'')}?subject=${encodeURIComponent((p.data.project||'Delivery')+' — ready for your review')}&body=${encodeURIComponent('Hi '+(p.data.client||'there')+',\n\nEverything is ready here:\n\n'+url+'\n\n— '+(p.data.biz||''))}"><i data-lucide="mail"></i>Compose email</a>                             </div>
     <p class="fine"                                                                       style="margin-top:24px;text-transform:none;letter-spacing:.02em">The portal travels
-inside the link. Editing later creates a new link — this one never breaks.</p>`);}
+inside the link. Editing later creates a new link — this one never breaks.</p>
+    ${!p.paid?`<p class="fine" style="text-transform:none;letter-spacing:.02em">Want this link without the Handoff mark? <a href="#" data-action="buy-portal" data-id="${p.id}" style="color:var(--ink)">Remove it — one-time $9</a>.</p>`:''}`);}
 function openUpgrade(msg){
   const feats=['Unlimited portals & deliverables','Remove the Handoff mark                entirely','Any brand color','Priority email support','Every new feature, first'];
   modal(`<div class="m-top"><span class="mono-label">Upgrade</span><button                class="ibtn" data-action="close" aria-label="Close"><i
@@ -829,6 +853,9 @@ n.offsetWidth;n.classList.add('shake');}return;}
     const toPrev=el.dataset.p==='prev';fp.classList.toggle('off',toPrev);pp.classList.toggle('on',toPrev);
     $$('.m-toggle .btn').forEach(b=>b.classList.toggle('on',b===el));},                     'pro':()=>{platformCheckout();},
   'setup-buy':()=>{setupCheckout();},
+  'buy-portal':async el=>{const p=state.portals.find(x=>x.id===el.dataset.id);
+    if(!p||p.paid)return;
+    await portalBuy(p.code);},
   'portal':async()=>{try{const r=await fetch(api('/api/portal'),{method:'POST',headers:{Authorization:'Bearer '+licToken()}});const d=await r.json();if(d.url)window.open(d.url,'_blank','noopener');else toast(d.error||'Portal unavailable','err');}catch{toast('Billing portal unreachable','err');}},
   'settings':()=>openSettings(),
   'save-settings':()=>{const g=k=>{const n=$('[data-k="'+k+'"]');return n?n.value.trim():'';};
@@ -852,7 +879,7 @@ document.addEventListener('click',e=>{                                          
   if(el){const                                                                            fn=ACTIONS[el.dataset.action];if(fn){e.preventDefault();fn(el);return;}}
   if(e.target&&e.target.classList&&e.target.classList.contains('overlay'))closeModal();});       document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 function go(h){if(location.hash===h)route();else location.hash=h;}                        function route(){const h=location.hash||'';
-  if(h.indexOf('#p=')===0){renderPortalClient(h.slice(3));return;}
+  if(h.indexOf('#p=')===0){const rest=h.slice(3);const q=rest.indexOf('&');renderPortalClient(q>-1?rest.slice(0,q):rest);return;}
   if(h==='#/'||h==='#'||h===''){renderLanding();return;}
   if(h==='#/studio'){renderStudio();return;}
   if(h==='#/new'){renderBuilder(null);return;}                                              if(h.indexOf('#/edit/')===0){renderBuilder(h.slice(7));return;}                           /* anything else (in-page anchors etc.) — leave the view alone */}
@@ -961,11 +988,49 @@ async function setupIssue(sid) {
   const clean = baseURL() + (sp.toString() ? '?' + sp.toString() : '') + '#/studio';
   location.replace(clean);
 }
+/* ============ paid single-use portals ($9 — removes the mark from one link) ==== */
+async function portalBuy(code) {
+  if (pbBusy) return; pbBusy = true;
+  toast('Connecting to secure checkout\u2026');
+  try {
+    const pc = await sha256Hex(code);
+    const pm = pendMap(); pm[pc] = code; pendSave(pm);
+    const r = await fetch(api('/api/checkout/portal'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: location.href.split('#')[0].split('?')[0], pc }) });
+    const d = await r.json();
+    if (d.url) { top.location.href = d.url; return; }
+    toast(d.error || 'Checkout unavailable \u2014 try again', 'err');
+  } catch { toast('Could not start checkout. Please try again in a minute.', 'err'); }
+  finally { pbBusy = false; }
+}
+let pbBusy = false;
+async function portalIssue(sid, pc) {
+  let r = null, lastErr = '';
+  for (let i = 0; i < 6; i++) {
+    try {
+      r = await fetch(api('/api/portal/issue') + '?session_id=' + encodeURIComponent(sid) + '&pc=' + encodeURIComponent(pc));
+      if (r.status !== 502 && r.status !== 503 && r.status !== 504) break;
+      lastErr = 'backend waking up (HTTP ' + r.status + ')';
+    } catch (e) { lastErr = 'backend unreachable'; r = null; }
+    if (i < 5) { toast('Waking the license server\u2026 this can take a minute.'); await new Promise(res => setTimeout(res, 5000)); }
+  }
+  if (!r) throw new Error(lastErr);
+  let d = {};
+  try { d = await r.json(); } catch {}
+  if (!r.ok) throw new Error(d.error || ('issue failed (HTTP ' + r.status + ')'));
+  const targetCode = (pendMap()[pc] || '').trim();
+  const hit = targetCode && state.portals.find(x => x.code === targetCode);
+  if (hit) { hit.paid = 1; hit.sid = sid; save(); }
+  const sp = new URLSearchParams(location.search);
+  sp.delete('portalgold'); sp.delete('session_id'); sp.delete('pc');
+  const clean = baseURL() + (sp.toString() ? '?' + sp.toString() : '') + '#/studio';
+  location.replace(clean);
+}
 /* ============ boot ============ */
 (function(){
   try{const sp=new URLSearchParams(location.search);
     if(sp.get('licensed')==='1'&&sp.get('session_id')){licIssue(sp.get('session_id')).catch(err=>{toast('Payment verified, but unlock failed: '+err.message+'. Leave this tab open and refresh in a minute.','err',15000);});}
     else if(sp.get('setup')==='1'&&sp.get('session_id')){setupIssue(sp.get('session_id')).catch(err=>{toast('Setup payment verified, but confirmation failed: '+err.message+'. Leave this tab open and refresh in a minute.','err',15000);});}
+    else if(sp.get('portalgold')==='1'&&sp.get('session_id')&&sp.get('pc')){portalIssue(sp.get('session_id'),sp.get('pc')).catch(err=>{toast('Payment verified, but the mark-removal failed: '+err.message+'. Leave this tab open and refresh in a minute.','err',15000);});}
     else if(sp.get('canceled')==='1'){sp.delete('canceled');
       const q=sp.toString();history.replaceState(null,'',location.pathname+(q?'?'+q:''));}}catch(e){}
   licRefresh().then(scheduleRefresh).catch(scheduleRefresh);

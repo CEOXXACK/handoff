@@ -31,7 +31,10 @@ the API host instead of being deleted — it was already in the CORS allowlist.
 
 Developers → Webhooks → existing endpoint `https://handoff-dq64.onrender.com/webhook`
 → **Update endpoint URL** to `https://handoff2.netlify.app/webhook` (test mode now,
-live endpoint again at go-live). Event stays `checkout.session.completed`.
+live endpoint again at go-live). Events (add all four):
+`checkout.session.completed`, `charge.refunded`, `charge.dispute.created`,
+`charge.dispute.closed` — the refund/dispute events revoke paid single-use
+portal unlocks (`/api/portal/paid` goes `paid:false`, mark returns on the link).
 
 ## Deploying a change
 
@@ -49,7 +52,7 @@ live endpoint again at go-live). Event stays `checkout.session.completed`.
 
 1. Stripe dashboard, test mode OFF:
    - Product catalog → `Handoff Pro` → recurring $15/mo → copy live `price_…`
-   - Developers → Webhooks → + endpoint `https://handoff2.netlify.app/webhook`, event `checkout.session.completed` → copy live `whsec_…`
+   - Developers → Webhooks → + endpoint `https://handoff2.netlify.app/webhook`, events `checkout.session.completed`, `charge.refunded`, `charge.dispute.created`, `charge.dispute.closed` → copy live `whsec_…`
    - Developers → API keys → reveal `sk_live_…`
 2. Netlify → `handoff2` site → Environment → swap exactly three values: `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` → Save → triggers redeploy.
 3. Smoke test with a REAL card ($15, refund yourself after): Go Pro → real checkout → Pro chip in studio → Manage subscription opens live portal.
@@ -70,3 +73,22 @@ evil-origin `base` injection blocked, license refresh 200 on active sub / 402 af
 cancellation / 401 on tampered cert, portal opens with a real customer license,
 webhook validates signed payloads (base64 body) and rejects forged signatures,
 CORS preflight honored for allowlisted origins only.
+
+## Single-use paid portals (added 2026-10-01, verified 43/43)
+
+$9 one-time Checkout (`mode: payment`, `managed_payments:{enabled:false}`) removes the
+Handoff mark from ONE portal link. No new env vars; single-use state lives in Stripe
+session metadata. Harness: `C:\Users\HP\.qwen\tmp\ho-fn-harness-portal.cjs` (43 checks;
+paid lifecycle via fixture wrapper because test-mode Checkout sessions have no
+PaymentIntent until a card completes).
+
+| Piece | Behavior |
+|---|---|
+| `POST /api/checkout/portal` | session for `{pc}` = sha256(portal code) — contents never leave the browser |
+| `GET /api/portal/issue?session_id=&pc=` | one-time redemption; stamps `metadata.paidCode`; 402 wrong price/kind, 409 different code, 403 revoked |
+| `GET /api/portal/paid?sid=&pc=` | live check for client browsers (link carries `&pid=<session_id>`); refund/dispute → `paid:false` instantly |
+| webhook events | `charge.refunded` / `charge.dispute.created` → session `metadata.revoked=1`; `charge.dispute.closed` (won) → cleared |
+
+Notes: success URL is public (`session_id` + `pc` land in browser history) — by design,
+since ownership is only claimed once and revocation is live; `metadata.revoked` is
+authoritative (refund wins over any cached state); go-live step 2 needs no extra env.
