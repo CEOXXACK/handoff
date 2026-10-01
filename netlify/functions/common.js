@@ -26,6 +26,7 @@ const LICENSE_SECRET = process.env.LICENSE_SECRET;
 const SITE_URL = (process.env.SITE_URL || '').replace(/\/+$/, '');
 const LICENSE_TTL_DAYS = 14;
 const SETUP_PRICE = 9900; // $99 one-time done-for-you setup
+const PORTAL_PRICE = 900; // $9 one-time single-use portal (mark removed from one link)
 
 /* ---- CORS: hardcoded hosts + ALLOWED_ORIGIN list (no wildcard — evil origins
  *      are denied everywhere, including as success_url bases). ---- */
@@ -128,8 +129,13 @@ async function subscriptionActive(subId) {
   return ['active', 'trialing', 'past_due'].includes(sub.status);
 }
 
+function sha256hex(s) {
+  return crypto.createHash('sha256').update(String(s), 'utf8').digest('hex');
+}
+
 module.exports = {
-  priceId, SITE_URL, LICENSE_TTL_DAYS, SETUP_PRICE,
+  priceId, SITE_URL, LICENSE_TTL_DAYS, SETUP_PRICE, PORTAL_PRICE,
   stripe, corsHeaders, handle, json, ok, fail, body, resolveBase,
   licenseSecret, signLicense, verifyLicense, bearerToken, subscriptionActive,
+  sha256hex,
 };
