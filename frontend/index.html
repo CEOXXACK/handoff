@@ -473,7 +473,7 @@ ${ready.length} ready</b></div>                                                 
     <div class="d-head"><span class="mono-label">Deliverables</span><span                 class="mono-label" style="color:var(--ink3)">${doneCnt}/${ready.length||0}
 approved</span></div>                                                                         <ol class="dlist">${rows}</ol>
     ${noneNote}${majorBlock}${accept}${settle}${foot}                                       </div>`;}
-/* ============ demo & templates ============ */                                          const SAMPLE={biz:'Cypress Gate Realty',email:'team@cypressgate.example',client:'The Ortiz Family',project:'Listing package — 214 Cypress Lane',color:'#1E5B40',t:Date.now(),msg:'Everything for the sale is below — disclosures, inspections and the final photo set. Stamp what you’ve reviewed and I’ll move on the offer the same day.',pay:'',amount:'',currency:'USD',due:inDays(21),items:[{t:'Disclosure package',n:'TDS, SPQ and natural-hazard report — signed PDFs inside',u:'',s:1},{t:'Inspection reports',n:'General home + roof, completed this week',u:'',s:1},{t:'Listing photos — final set',n:'24 retouched shots, MLS and web sizes',u:'',s:1},{t:'Offer packet — review & sign',n:'Buyer pre-approval and signed offer terms',u:'',s:0}]};
+/* ============ demo & templates ============ */                                          const SAMPLE={biz:'Cypress Gate Realty',email:'team@cypressgate.example',client:'The Hartmann Family',project:'1438 Alder Street — Listing Package',color:'#1E5B40',t:Date.now(),msg:'Everything for the launch of 1438 Alder Street is below — the approved listing copy, the final photo set, the floorplan and tour link, and your launch-day captions. Everything marked Ready is final — stamp what you approve, and it’s on record the same day.',pay:'',amount:'',currency:'USD',due:inDays(21),items:[{t:'Listing description — final copy',n:'Approved wording before it goes live',u:'',s:1},{t:'Photo set — 31 edited shots',n:'Final selects, web and print sizes',u:'',s:1},{t:'Floorplan + tour link',n:'Room measurements and the virtual walkthrough',u:'',s:1},{t:'Launch kit',n:'Social captions, flyer PDF and sign-rider art',u:'',s:0}]};
 const TPL={
   design:()=>({biz:state.biz,email:state.email,client:'',project:'Design delivery —',color:'#1E5B40',t:Date.now(),
     msg:'Hi — everything final is below. Stamp what you approve and I\u2019ll release the source files the same day.',
@@ -507,7 +507,7 @@ function renderLanding(){
       <button class="nav-a" data-action="scroll" data-t="how">How it works</button>             <button class="nav-a" data-action="scroll" data-t="pricing">Pricing</button>
       <a class="btn btn-line sm" href="#/studio">Open studio</a>                              </nav></div></header>
   <section class="wrap hero">                                                                 <div>
-      <p class="mono-label eyebrow">For realtors, agents &amp; brokers</p>               <h1 class="display">Send the whole file.<em>Get the signature.</em></h1>                                                                                 <p class="lede">Handoff packs your listing package — disclosures, reports, addenda, photos and your payment link — into one branded page your client opens, reviews, and stamps. No logins. No download portals. No “did you get my file?”</p>
+      <p class="mono-label eyebrow">For real estate agents &amp; brokers</p>               <h1 class="display">Send the listing packet.<em>Get the stamp. Move on.</em></h1>                                                                                 <p class="lede">Handoff packs your listing package — disclosures, reports, addenda, photos and your payment link — into one branded page your client opens, reviews, and stamps. No logins. No download portals. No “did you see my email?”</p>
       <div class="hero-cta">
         <a class="btn btn-green" href="#/new"><i data-lucide="plus"></i>Create your
 first portal</a>                                                                                  <button class="btn btn-line" data-action="see-demo"><i
@@ -515,17 +515,14 @@ data-lucide="eye"></i>See a live portal</button>
       </div>
       <p class="fine">No signup · Runs in your browser · Your client needs                nothing</p>
     </div>                                                                                    <div class="specimen noprint">
-      <div class="spec-box"><div class="spec-scale">${spec}</div></div>                         <p class="mono-label spec-cap">A live Handoff portal — stamp something.</p>
+      <div class="spec-box"><div class="spec-scale">${spec}</div></div>                         <p class="mono-label spec-cap">A live Handoff portal — stamp what you approve.</p>
     </div>                                                                                  </section>
   <section class="sect" id="how"><div class="wrap">                                           <div class="sec-label mono-label">§ 01 · How it works</div>
-    <div class="steps">                                                                         <div class="step"><span class="step-idx">01</span><div><h3>Stack the file</h3><p>List what you’re sending — disclosure package, inspection reports, addenda, final photos — and paste a link to each piece. Flip the finished ones to <b>Ready</b>. Two minutes, tops.</p></div></div>                                                                  <div class="step"><span class="step-idx">02</span><div><h3>Copy one
-link</h3><p>Handoff packs the entire portal into the URL itself. Nothing is               uploaded, nothing is hosted, nothing expires. The link opens on any device, for
-anyone.</p></div></div>
-      <div class="step"><span class="step-idx">03</span><div><h3>They stamp. You get
-paid.</h3><p>Your client reviews, stamps each deliverable, and settles the invoice        on the same page. The acceptance lands in your inbox — your proof of delivery for the transaction file.</p></div></div>                                                                     </div></div></section>
+    <div class="steps">                                                                         <div class="step"><span class="step-idx">01</span><div><h3>Build the packet</h3><p>Paste links to the deck, photos, floorplan, flyer, and docs. Flip each to <b>Ready</b>. Five minutes between showings.</p></div></div>                                                                  <div class="step"><span class="step-idx">02</span><div><h3>Send the one link</h3><p>Handoff packs the entire portal into the URL itself. Nothing is               uploaded, nothing is hosted, nothing expires. The link opens on your seller’s phone at the kitchen table — no app, no account, no download.</p></div></div>
+      <div class="step"><span class="step-idx">03</span><div><h3>They stamp. It’s on record.</h3><p>Your seller stamps each deliverable, and the acceptance lands in your inbox — your proof of delivery when anyone asks what was approved, and when.</p></div></div>                                                                     </div></div></section>
   <section class="sect" id="features"><div class="wrap">                                      <div class="sec-label mono-label">§ 02 · Why it converts</div>
     <div>                                                                                       <div class="feat"><div class="feat-l"><span
-class="feat-idx">01</span><h3>Approvals that feel official</h3></div><p>A rubber          stamp your client can\u2019t resist slamming — and an email trail you can if a deal is ever disputed.</p></div>
+class="feat-idx">01</span><h3>Approvals that feel official</h3></div><p>The seller stamps the listing copy and photo selects before MLS day — approval they can feel, proof you can keep.</p></div>
       <div class="feat"><div class="feat-l"><span
 class="feat-idx">02</span><h3>Payment at the peak</h3></div><p>Your payment link sits on the page where the deal feels won — right after the stamp, not buried under an email signature.</p></div>
       <div class="feat"><div class="feat-l"><span class="feat-idx">03</span><h3>Zero      onboarding</h3></div><p>Clients never sign up, never install, never see a dashboard.
@@ -537,7 +534,7 @@ breach, no files to leak, no infrastructure to babysit.</p></div>
 brand up front</h3></div><p>Color, monogram, tone of voice. It reads as you — the
 Handoff mark stays politely small. <span class="mono-label">(Pro)</span></p></div>
       <div class="feat"><div class="feat-l"><span
-class="feat-idx">06</span><h3>Snapshots, not live docs</h3></div><p>Every copy is         frozen in time. Edit later and old links keep their integrity — exactly what              sign-off needs.</p></div>
+class="feat-idx">06</span><h3>Snapshots, not live docs</h3></div><p>After closing-day chaos, links don’t lie — old links freeze exactly what was approved, and when.</p></div>
     </div></div></section>                                                                  <section class="sect" id="pricing"><div class="wrap price-grid">
     <div>
       <div class="sec-label mono-label">§ 03 · Pricing</div>
@@ -674,7 +671,7 @@ placeholder="Cypress Gate Realty"></div>
 email</label><input id="f-email" data-k="email" type="email"
 value="${esc(draft.email)}" placeholder="you@studio.com"></div>
           <div class="field"><label class="mono-label"                                    for="f-client">Client</label><input id="f-client" data-k="client"
-value="${esc(draft.client)}" placeholder="The Ortiz Family"></div>
+value="${esc(draft.client)}" placeholder="The Hartmann Family"></div>
         </div>
         <div class="fsec"><span class="mono-label">02 · The work</span></div>
         <div class="field"><label class="mono-label" for="f-project">Project
