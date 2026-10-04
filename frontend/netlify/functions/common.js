@@ -39,6 +39,9 @@ function corsOriginList() {
   const list = (!raw || raw === '*') ? [] : raw.split(',').map(s => s.trim()).filter(Boolean);
   return list.concat([
     'https://ceoxxack.github.io',
+    'https://stampofapproval.lol',
+    'https://www.stampofapproval.lol',
+    'https://handoff-app-6kn.pages.dev',
     'https://handoff2.netlify.app',
   ]);
 }
