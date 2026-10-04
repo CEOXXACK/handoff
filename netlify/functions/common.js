@@ -18,7 +18,11 @@ function stripe() {
 }
 
 /* ---- config ---- */
-function priceId() {
+function priceId(plan) {
+  if (plan === 'yearly') {
+    if (!process.env.STRIPE_PRICE_ID_YEARLY) throw new Error('Yearly plan not configured');
+    return process.env.STRIPE_PRICE_ID_YEARLY;
+  }
   if (!process.env.STRIPE_PRICE_ID) throw new Error('STRIPE_PRICE_ID not configured');
   return process.env.STRIPE_PRICE_ID;
 }

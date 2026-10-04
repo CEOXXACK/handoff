@@ -800,11 +800,11 @@ inside the link. Editing later creates a new link — this one never breaks.</p>
 function openUpgrade(msg){
   const feats=['Unlimited portals & deliverables','Remove the Handoff mark                entirely','Any brand color','Priority email support','Every new feature, first'];
   modal(`<div class="m-top"><span class="mono-label">Upgrade</span><button                class="ibtn" data-action="close" aria-label="Close"><i
-data-lucide="x"></i></button></div>                                                           <h3>Handoff Pro</h3><div class="price">$15<span> / month</span></div>
+data-lucide="x"></i></button></div>                                                           <h3>Handoff Pro</h3><div class="m-toggle noprint" style="margin-bottom:14px"><button class="btn btn-line sm on" id="billM" data-action="bill" data-plan="monthly">Monthly</button><button class="btn btn-line sm" id="billY" data-action="bill" data-plan="yearly">Yearly — save 20%</button></div><div class="price"><span id="priceNum">$15</span><span id="pricePer"> / month</span></div>
     <ul class="up-list">${feats.map(f=>`<li><i
 data-lucide="check"></i>${f}</li>`).join('')}</ul>                                            ${hasLicense()
       ?`<p class="fine" style="text-transform:none;letter-spacing:.02em;color:var(--ink2)">Pro is active on this browser${licVal&&licVal.email?' — '+esc(licVal.email):''}. Manage billing anytime via Settings.</p>`
-      :`<a class="btn btn-green wide" data-action="pro" href="#/pro">Continue to secure checkout — $15/mo</a>`}
+      :`<a class="btn btn-green wide" id="upCta" data-action="pro" href="#/pro">Continue to secure checkout — $15/mo</a>`}
     ${hasSetup()
       ?`<div style="margin-top:18px;border:1px solid var(--line2);border-radius:3px;padding:14px 16px;background:var(--paper2)"><span class="mono-label" style="color:var(--green)">✓ Done-for-you setup purchased</span><p class="fine" style="margin-top:6px;text-transform:none;letter-spacing:.02em">We'll be in touch at ${esc(state.email||licVal&&licVal.email||'your email')} to gather your logo, colors and defaults.</p></div>`
       :`<div style="margin-top:18px;border:1px solid var(--line2);border-radius:3px;padding:14px 16px;background:var(--paper2)"><span class="mono-label">Add-on — Done-for-you setup</span><p class="fine" style="margin:6px 0 12px;text-transform:none;letter-spacing:.02em;color:var(--ink2)">We customize Handoff for your business: logo, brand color, defaults, and your first portal built with you. One-time $99.</p><a class="btn wide" data-action="setup-buy" href="#/setup">Add Done-for-you setup — $99 once</a></div>`}
@@ -851,7 +851,14 @@ n.offsetWidth;n.classList.add('shake');}return;}
   'custom-color':()=>{if(state.plan!=='pro')openUpgrade('Custom brand colors are          part of Pro.');else{const ci=$('#f-color');ci&&ci.click();}},
   'pane':el=>{const fp=$('#formPane'),pp=$('#pvPane');if(!fp)return;
     const toPrev=el.dataset.p==='prev';fp.classList.toggle('off',toPrev);pp.classList.toggle('on',toPrev);
-    $$('.m-toggle .btn').forEach(b=>b.classList.toggle('on',b===el));},                     'pro':()=>{platformCheckout();},
+    $$('.m-toggle .btn').forEach(b=>b.classList.toggle('on',b===el));},                     'bill':el=>{upPlan=el.dataset.plan;
+    const bm=$('#billM'),by=$('#billY');
+    if(bm)bm.className=el.dataset.plan==='monthly'?'btn btn-line sm on':'btn btn-line sm';
+    if(by)by.className=el.dataset.plan==='yearly'?'btn btn-line sm on':'btn btn-line sm';
+    const pn=$('#priceNum'),pp=$('#pricePer'),cta=$('#upCta');
+    if(pn)pn.textContent=el.dataset.plan==='yearly'?'$144':'$15';
+    if(pp)pp.textContent=el.dataset.plan==='yearly'?' / year — 2 months free':' / month';
+    if(cta)cta.textContent=el.dataset.plan==='yearly'?'Continue to secure checkout — $144/yr':'Continue to secure checkout — $15/mo';},                     'pro':()=>{platformCheckout(upPlan);},
   'setup-buy':()=>{setupCheckout();},
   'buy-portal':async el=>{const p=state.portals.find(x=>x.id===el.dataset.id);
     if(!p||p.paid)return;
@@ -930,12 +937,13 @@ async function licRefresh() {
 }
 function scheduleRefresh() { clearInterval(licTimer); if (hasLicense()) licTimer = setInterval(licRefresh, 6 * 3600 * 1000); }
 let ckBusy = false;
-async function platformCheckout() {
+let upPlan = 'monthly';
+async function platformCheckout(plan) {
   if (ckBusy) return; ckBusy = true;
   toast('Connecting to secure checkout\u2026 first load after idle can take up to a minute.');
   try {
     const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 120000);
-    const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: location.href.split('#')[0].split('?')[0] }), signal: ctl.signal });
+    const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: location.href.split('#')[0].split('?')[0], plan: plan || undefined }), signal: ctl.signal });
     clearTimeout(to);
     const d = await r.json();
     if (d.url) { top.location.href = d.url; return; }
@@ -943,7 +951,7 @@ async function platformCheckout() {
   } catch {
     toast('Checkout is slow to wake \u2014 retrying once\u2026');
     try {
-      const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: location.href.split('#')[0].split('?')[0] }) });
+      const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: location.href.split('#')[0].split('?')[0], plan: plan || undefined }) });
       const d = await r.json();
       if (d.url) { top.location.href = d.url; return; }
     } catch {}
