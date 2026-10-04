@@ -41,6 +41,8 @@ function corsOriginList() {
     'https://ceoxxack.github.io',
     'https://stampofapproval.lol',
     'https://www.stampofapproval.lol',
+    'https://freelance.stampofapproval.lol',
+    'https://handoff-freelance.pages.dev',
     'https://handoff-app-6kn.pages.dev',
     'https://handoff2.netlify.app',
   ]);
