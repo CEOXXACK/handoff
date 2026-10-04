@@ -30,7 +30,7 @@ const LICENSE_SECRET = process.env.LICENSE_SECRET;
 const SITE_URL = (process.env.SITE_URL || '').replace(/\/+$/, '');
 const LICENSE_TTL_DAYS = 14;
 const SETUP_PRICE = 9900; // $99 one-time done-for-you setup
-const PORTAL_PRICE = 900; // $9 one-time single-use portal (mark removed from one link)
+const PORTAL_PRICE = 249; // $2.49 one-time single-use portal (mark removed from one link)
 
 /* ---- CORS: hardcoded hosts + ALLOWED_ORIGIN list (no wildcard — evil origins
  *      are denied everywhere, including as success_url bases). ---- */

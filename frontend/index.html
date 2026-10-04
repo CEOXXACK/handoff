@@ -391,7 +391,7 @@ const accKey=c=>'hnd.acc.'+hash(c);
 function getAcc(c){try{const
 v=JSON.parse(localStorage.getItem(accKey(c)));if(v&&v.items)return v;}catch(e){}return{items:{}};}                                                           function
 storeAcc(c,v){try{localStorage.setItem(accKey(c),JSON.stringify(v));}catch(e){}}          const readyIdx=d=>(d.items||[]).map((it,i)=>it.s?i:-1).filter(i=>i>=0);
-/* ============ paid single-use unlocks ($9 removes the mark from one link) ========= */
+/* ============ paid single-use unlocks ($2.49 removes the mark from one link) ========= */
 const PEND_KEY='handoff.portalPend.v1';
 function pendMap(){try{const m=JSON.parse(localStorage.getItem(PEND_KEY));if(m&&typeof m==='object')return m;}catch(e){}return{};}
 function pendSave(m){try{localStorage.setItem(PEND_KEY,JSON.stringify(m));}catch(e){}}
@@ -609,7 +609,7 @@ ${p.paid?'gold':p.archived?'wip':'ok'}">${p.paid?'Paid':p.archived?'Archived':'L
         <a class="ibtn" href="#p=${p.code}${p.paid&&p.sid?'&pid='+encodeURIComponent(p.sid):''}" aria-label="Open portal" title="Open          portal"><i data-lucide="eye"></i></a>
         <button class="ibtn" data-action="copy-url"                                       data-url="${esc(shareLinkFor(p))}" aria-label="Copy link" title="Copy
 link"><i data-lucide="copy"></i></button>
-        ${!p.paid?`<button class="ibtn" data-action="buy-portal" data-id="${p.id}" aria-label="Remove the mark — one-time $9" title="Remove the mark — one-time $9"><i data-lucide="badge-check"></i></button>`:''}
+        ${!p.paid?`<button class="ibtn" data-action="buy-portal" data-id="${p.id}" aria-label="Remove the mark — one-time $2.49" title="Remove the mark — one-time $2.49"><i data-lucide="badge-check"></i></button>`:''}
         <a class="ibtn" href="#/edit/${p.id}" aria-label="Edit" title="Edit"><i
 data-lucide="pen-line"></i></a>                                                                   <button class="ibtn" data-action="archive" data-id="${p.id}"
 aria-label="${p.archived?'Restore':'Archive'}"                                            title="${p.archived?'Restore':'Archive'}"><i
@@ -796,7 +796,7 @@ portal</a>
 href="mailto:${encodeURIComponent(p.data.email||'')}?subject=${encodeURIComponent((p.data.project||'Delivery')+' — ready for your review')}&body=${encodeURIComponent('Hi '+(p.data.client||'there')+',\n\nEverything is ready here:\n\n'+url+'\n\n— '+(p.data.biz||''))}"><i data-lucide="mail"></i>Compose email</a>                             </div>
     <p class="fine"                                                                       style="margin-top:24px;text-transform:none;letter-spacing:.02em">The portal travels
 inside the link. Editing later creates a new link — this one never breaks.</p>
-    ${!p.paid?`<p class="fine" style="text-transform:none;letter-spacing:.02em">Want this link without the Handoff mark? <a href="#" data-action="buy-portal" data-id="${p.id}" style="color:var(--ink)">Remove it — one-time $9</a>.</p>`:''}`);}
+    ${!p.paid?`<p class="fine" style="text-transform:none;letter-spacing:.02em">Want this link without the Handoff mark? <a href="#" data-action="buy-portal" data-id="${p.id}" style="color:var(--ink)">Remove it — one-time $2.49</a>.</p>`:''}`);}
 function openUpgrade(msg){
   const feats=['Unlimited portals & deliverables','Remove the Handoff mark                entirely','Any brand color','Priority email support','Every new feature, first'];
   modal(`<div class="m-top"><span class="mono-label">Upgrade</span><button                class="ibtn" data-action="close" aria-label="Close"><i
@@ -996,7 +996,7 @@ async function setupIssue(sid) {
   const clean = baseURL() + (sp.toString() ? '?' + sp.toString() : '') + '#/studio';
   location.replace(clean);
 }
-/* ============ paid single-use portals ($9 — removes the mark from one link) ==== */
+/* ============ paid single-use portals ($2.49 — removes the mark from one link) ==== */
 async function portalBuy(code) {
   if (pbBusy) return; pbBusy = true;
   toast('Connecting to secure checkout\u2026');
