@@ -2,8 +2,7 @@
 <html lang="en">                                                                          <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Handoff — send client work in one link</title>                                     <meta name="description" content="Handoff packs your client delivery — deliverables,
-approvals and payment — into a single self-contained link. No accounts, no                uploads.">
+<title>Handoff — listing deliveries in one link</title>                                     <meta name="description" content="Handoff packs your listing package — disclosures, reports, approvals and payment — into one self-contained link your client opens, stamps, and returns. No accounts, no uploads.">
 <meta name="theme-color" content="#F5F1E8">
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"
 viewBox="0 0 32 32"><rect x="5" y="5" width="22" height="22" fill="none"
@@ -474,12 +473,7 @@ ${ready.length} ready</b></div>                                                 
     <div class="d-head"><span class="mono-label">Deliverables</span><span                 class="mono-label" style="color:var(--ink3)">${doneCnt}/${ready.length||0}
 approved</span></div>                                                                         <ol class="dlist">${rows}</ol>
     ${noneNote}${majorBlock}${accept}${settle}${foot}                                       </div>`;}
-/* ============ demo & templates ============ */                                          const SAMPLE={biz:'Atelier North',email:'studio@ateliernorth.example',client:'Meridian Hotels',                        project:'Brand Identity — Phase II',color:'#1E5B40',t:Date.now(),
-  msg:'Phase II is complete. Below: the expanded identity system, both packaging directions, and the motion principles we discussed. Everything marked Ready is final— stamp what you approve, and I release the source files the same day.',                    pay:'',amount:'6,800',currency:'USD',due:inDays(21),items:[
-    {t:'Identity system — 24 boards',n:'Lockups, type scale, color in use,                photography direction',u:'',s:1},
-    {t:'Packaging direction A — \u201CQuiet Luxe\u201D',n:'Three SKUs, print-ready        dielines',u:'',s:1},
-    {t:'Packaging direction B — \u201CField Notes\u201D',n:'Kraft stock, one-color        overprint studies',u:'',s:1},
-    {t:'Motion principles reel',n:'90-second reference cut, type behavior                 included',u:'',s:0}]};
+/* ============ demo & templates ============ */                                          const SAMPLE={biz:'Cypress Gate Realty',email:'team@cypressgate.example',client:'The Ortiz Family',project:'Listing package — 214 Cypress Lane',color:'#1E5B40',t:Date.now(),msg:'Everything for the sale is below — disclosures, inspections and the final photo set. Stamp what you’ve reviewed and I’ll move on the offer the same day.',pay:'',amount:'',currency:'USD',due:inDays(21),items:[{t:'Disclosure package',n:'TDS, SPQ and natural-hazard report — signed PDFs inside',u:'',s:1},{t:'Inspection reports',n:'General home + roof, completed this week',u:'',s:1},{t:'Listing photos — final set',n:'24 retouched shots, MLS and web sizes',u:'',s:1},{t:'Offer packet — review & sign',n:'Buyer pre-approval and signed offer terms',u:'',s:0}]};
 const TPL={
   design:()=>({biz:state.biz,email:state.email,client:'',project:'Design delivery —',color:'#1E5B40',t:Date.now(),
     msg:'Hi — everything final is below. Stamp what you approve and I\u2019ll release the source files the same day.',
@@ -509,13 +503,11 @@ function renderLanding(){
   const spec=sheetHTML(SAMPLE,serialOf(JSON.stringify(SAMPLE)),{items:{}},{mark:true,token,ctx:'spec'});
   app.innerHTML=`<div class="view">
   <header class="top noprint"><div class="wrap top-in">                                       <a class="wordmark" href="#/"><span class="wm-mark">H</span>Handoff</a>
-    <span class="mono-label top-tag">Client delivery, solved</span>                           <nav class="top-nav">
+    <span class="mono-label top-tag">Listing day, solved</span>                           <nav class="top-nav">
       <button class="nav-a" data-action="scroll" data-t="how">How it works</button>             <button class="nav-a" data-action="scroll" data-t="pricing">Pricing</button>
       <a class="btn btn-line sm" href="#/studio">Open studio</a>                              </nav></div></header>
   <section class="wrap hero">                                                                 <div>
-      <p class="mono-label eyebrow">For independent studios &amp; freelancers</p>               <h1 class="display">One link between <em>finished work</em> and <em>getting
-paid.</em></h1>                                                                                 <p class="lede">Handoff turns your delivery into a branded page your client
-opens, approves, and pays from. No accounts. No attachments. No \u201Cso which file       is final?\u201D</p>
+      <p class="mono-label eyebrow">For realtors, agents &amp; brokers</p>               <h1 class="display">Send the whole file.<em>Get the signature.</em></h1>                                                                                 <p class="lede">Handoff packs your listing package — disclosures, reports, addenda, photos and your payment link — into one branded page your client opens, reviews, and stamps. No logins. No download portals. No “did you get my file?”</p>
       <div class="hero-cta">
         <a class="btn btn-green" href="#/new"><i data-lucide="plus"></i>Create your
 first portal</a>                                                                                  <button class="btn btn-line" data-action="see-demo"><i
@@ -526,19 +518,16 @@ data-lucide="eye"></i>See a live portal</button>
       <div class="spec-box"><div class="spec-scale">${spec}</div></div>                         <p class="mono-label spec-cap">A live Handoff portal — stamp something.</p>
     </div>                                                                                  </section>
   <section class="sect" id="how"><div class="wrap">                                           <div class="sec-label mono-label">§ 01 · How it works</div>
-    <div class="steps">                                                                         <div class="step"><span class="step-idx">01</span><div><h3>Write the
-manifest</h3><p>List what you\u2019re delivering. Paste a link to each piece —            Figma, Drive, GitHub, a zip — and flip the finished ones to <b>Ready</b>. Two
-minutes, tops.</p></div></div>                                                                  <div class="step"><span class="step-idx">02</span><div><h3>Copy one
+    <div class="steps">                                                                         <div class="step"><span class="step-idx">01</span><div><h3>Stack the file</h3><p>List what you’re sending — disclosure package, inspection reports, addenda, final photos — and paste a link to each piece. Flip the finished ones to <b>Ready</b>. Two minutes, tops.</p></div></div>                                                                  <div class="step"><span class="step-idx">02</span><div><h3>Copy one
 link</h3><p>Handoff packs the entire portal into the URL itself. Nothing is               uploaded, nothing is hosted, nothing expires. The link opens on any device, for
 anyone.</p></div></div>
       <div class="step"><span class="step-idx">03</span><div><h3>They stamp. You get
-paid.</h3><p>Your client reviews, stamps each deliverable, and settles the invoice        on the same page. The acceptance lands in your inbox — your proof of
-delivery.</p></div></div>                                                                     </div></div></section>
+paid.</h3><p>Your client reviews, stamps each deliverable, and settles the invoice        on the same page. The acceptance lands in your inbox — your proof of delivery for the transaction file.</p></div></div>                                                                     </div></div></section>
   <section class="sect" id="features"><div class="wrap">                                      <div class="sec-label mono-label">§ 02 · Why it converts</div>
     <div>                                                                                       <div class="feat"><div class="feat-l"><span
-class="feat-idx">01</span><h3>Approvals that feel official</h3></div><p>A rubber          stamp your client can\u2019t resist slamming — and an email trail you can invoice         against.</p></div>
+class="feat-idx">01</span><h3>Approvals that feel official</h3></div><p>A rubber          stamp your client can\u2019t resist slamming — and an email trail you can if a deal is ever disputed.</p></div>
       <div class="feat"><div class="feat-l"><span
-class="feat-idx">02</span><h3>Payment at the peak</h3></div><p>Your pay link sits on      the page where the work looks its best — not buried under an email                        signature.</p></div>
+class="feat-idx">02</span><h3>Payment at the peak</h3></div><p>Your payment link sits on the page where the deal feels won — right after the stamp, not buried under an email signature.</p></div>
       <div class="feat"><div class="feat-l"><span class="feat-idx">03</span><h3>Zero      onboarding</h3></div><p>Clients never sign up, never install, never see a dashboard.
 The link is the entire product.</p></div>
       <div class="feat"><div class="feat-l"><span class="feat-idx">04</span><h3>The
@@ -583,7 +572,7 @@ payment link (Stripe, PayPal, anything) into each portal. The Pro subscription b
 through secure Stripe Checkout: click Go Pro, pay $15/mo, and Pro unlocks immediately —
 manage or cancel anytime from Settings.</p></details>                                                                  <details><summary>What happens if I stop paying?</summary><p>Every link               you\u2019ve already sent keeps working forever — the data travels inside it.              You\u2019d only lose unlimited creation and the Pro cosmetics.</p></details>
   </div></section>                                                                          <section class="band"><div class="wrap band-in">
-    <h2 class="display">Your work is already excellent.<br><em>Send it that               way.</em></h2>
+    <h2 class="display">Your file is already solid.<br><em>Deliver it that way.</em></h2>
     <a class="btn btn-green" href="#/new">Create a portal — free</a>                        </div></section>
   <footer class="foot"><div class="wrap foot-in">                                             <a class="wordmark" href="#/"><span class="wm-mark">H</span>Handoff</a>
     <span class="mono-label">The last link you send</span>
@@ -680,12 +669,12 @@ style="font-size:clamp(26px,3vw,36px)">${editing?'Edit portal':'New portal'}</h2
         <div class="f-grid three">
           <div class="field"><label class="mono-label" for="f-biz">Your
 business</label><input id="f-biz" data-k="biz" value="${esc(draft.biz)}"
-placeholder="Atelier North"></div>
+placeholder="Cypress Gate Realty"></div>
           <div class="field"><label class="mono-label" for="f-email">Your
 email</label><input id="f-email" data-k="email" type="email"
 value="${esc(draft.email)}" placeholder="you@studio.com"></div>
           <div class="field"><label class="mono-label"                                    for="f-client">Client</label><input id="f-client" data-k="client"
-value="${esc(draft.client)}" placeholder="Meridian Hotels"></div>
+value="${esc(draft.client)}" placeholder="The Ortiz Family"></div>
         </div>
         <div class="fsec"><span class="mono-label">02 · The work</span></div>
         <div class="field"><label class="mono-label" for="f-project">Project
