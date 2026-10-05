@@ -423,7 +423,7 @@ function doApprove(i,el){                                                       
 href="${esc(it.u)}" target="_blank" rel="noopener">Open<i                                 data-lucide="arrow-up-right"></i></a>`:'';
   if(ctx.persist){                                                                            const acc=getAcc(ctx.code);if(acc.items[i])return;
     acc.items[i]=Date.now();storeAcc(ctx.code,acc);                                           const row=$(`.d-item[data-idx="${i}"]`);if(!row)return;
-    $('.d-side',row).innerHTML=`<span class="chip ok">Approved</span><div                 class="d-btns">${link}${stampHTML(ctx.data.color,'Approved',acc.items[i],true)}</div>class="d-bts">${link}${stampHTML(ctx.data.color,'Approved',acc.items[i],true)}</div>`;             row.classList.add('is-ok');thunk();refreshIcons();maybeAccept(ctx,acc);
+    $('.d-side',row).innerHTML=`<span class="chip ok">Approved</span><div                 class="d-btns">${link}${stampHTML(ctx.data.color,'Approved',acc.items[i],true)}</div>`;             row.classList.add('is-ok');thunk();refreshIcons();maybeAccept(ctx,acc);
   }else{                                                                                      if(ctx.ok[i])return;ctx.ok[i]=Date.now();
     const row=$(`.d-item[data-idx="${i}"]`);if(!row)return;                                   $('.d-side',row).innerHTML=`<span class="chip ok">Approved</span><div
 class="d-btns">${link}${stampHTML(ctx.data.color,'Approved',ctx.ok[i],true)}</div>`;          row.classList.add('is-ok');thunk();maybeAccept(ctx,{items:ctx.ok});
