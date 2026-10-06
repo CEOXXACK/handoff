@@ -4,6 +4,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Handoff — listing deliveries in one link</title>                                     <meta name="description" content="Handoff packs your listing package — disclosures, reports, approvals and payment — into one self-contained link your client opens, stamps, and returns. No accounts, no uploads.">
 <meta name="theme-color" content="#F5F1E8">
+<!-- Meta Pixel -->
+<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','1113756584506580');fbq('track','PageView');</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1113756584506580&ev=PageView&noscript=1"/></noscript>
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"
 viewBox="0 0 32 32"><rect x="5" y="5" width="22" height="22" fill="none"
 stroke="%23221D14" stroke-width="2.5" transform="rotate(-6 16 16)"/><text x="16"          y="21.5" font-family="monospace" font-size="12" font-weight="bold"
@@ -931,6 +934,7 @@ async function licIssue(sid) {
   const sp = new URLSearchParams(location.search);
   sp.delete('licensed'); sp.delete('session_id');
   const clean = baseURL() + (sp.toString() ? '?' + sp.toString() : '') + '#/studio';
+  try { if (window.fbq) fbq('track', 'Purchase', { content_name: 'pro_unlock' }); } catch (e) {}
   location.replace(clean);
 }
 let licTimer = null;
@@ -953,6 +957,7 @@ let ckBusy = false;
 let upPlan = 'monthly';
 async function platformCheckout(plan) {
   if (ckBusy) return; ckBusy = true;
+  try { if (window.fbq) fbq('track', 'Lead', { content_name: 'pro_checkout', plan: plan === 'yearly' ? 'annual' : 'monthly' }); } catch (e) {}
   toast('Connecting to secure checkout\u2026 first load after idle can take up to a minute.');
   try {
     const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 120000);
