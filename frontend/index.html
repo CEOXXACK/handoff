@@ -521,8 +521,8 @@ data-lucide="eye"></i>See a live portal</button>
     <div class="sec-label mono-label">§ 00 · Watch it work</div>
     <video controls preload="metadata" poster="promo-poster.jpg" playsinline
       style="display:block;width:100%;max-width:1100px;margin:18px auto 0;border-radius:14px;background:#000;box-shadow:0 18px 60px rgba(34,29,20,.22)">
-      <source src="promo-final.mp4" type="video/mp4">
-      Your browser can’t play embedded video. <a href="promo-final.mp4">Watch it here</a>.
+      <source src="promo-metal.mp4" type="video/mp4">
+      Your browser can’t play embedded video. <a href="promo-metal.mp4">Watch it here</a>.
     </video>
     <p class="fine" style="text-align:center;margin-top:12px">81 seconds — the whole Handoff loop, sound on.</p>
   </div></section>
@@ -820,6 +820,12 @@ value="${esc(state.payLink)}"></div>
     <div class="m-row">                                                                         <button class="btn" data-action="save-settings">Save defaults</button>                    <button class="btn btn-line" data-action="export">Export studio</button>
       <button class="btn btn-line" data-action="import">Import</button>
       <button class="btn btn-ghost" data-action="wipe">Erase everything</button>              </div>
+    ${(function(){ if(!(state.plan==='pro'&&hasLicense())) return '';
+      return `<div style="margin-top:22px;border-top:1px dotted var(--line2);padding-top:18px">
+      <span class="mono-label">Refer &amp; save</span>
+      <p class="fine" style="margin:8px 0 12px;text-transform:none;letter-spacing:.02em;color:var(--ink2)">Give friends <b>20% off</b> every bill. Your own price drops too — 10% after your first referral, 15% after four, 25% after ten.</p>
+      <div class="m-row"><button class="btn btn-line sm" data-action="referral-show">Show my referral code</button></div>
+      </div>`;})()}
     <div class="m-row" style="margin-top:8px;align-items:center">                               <span class="mono-label" style="color:var(--ink3)">Plan:
 ${state.plan==='pro'?'Pro — thanks for backing it':'Free'}</span>                               ${hasLicense() ? `<button class="btn btn-line sm" data-action="portal">Manage subscription</button>` : (state.plan!=='pro' ? `<a class="btn btn-green sm" data-action="pro" href="#/pro">Upgrade — $15/mo</a>` : ``)}
     </div>
@@ -862,6 +868,14 @@ n.offsetWidth;n.classList.add('shake');}return;}
     if(!p||p.paid)return;
     await portalBuy(p.code);},
   'portal':async()=>{try{const r=await fetch(api('/api/portal'),{method:'POST',headers:{Authorization:'Bearer '+licToken()}});const d=await r.json();if(d.url)window.open(d.url,'_blank','noopener');else toast(d.error||'Portal unavailable','err');}catch{toast('Billing portal unreachable','err');}},
+  'referral-show':async()=>{try{
+    const r=await fetch(api('/api/referral'),{headers:{Authorization:'Bearer '+licToken()}});
+    const d=await r.json();
+    if(!r.ok||!d.code){toast(d.error||'Referral code unavailable','err');return;}
+    const link='https://stampofapproval.lol/?ref='+d.code;
+    try{navigator.clipboard.writeText(link);}catch(e){}
+    toast('Your code: '+d.code+' — link copied ('+(d.referrals||0)+' referrals \u00b7 '+(d.pct||0)+'% off your bill \u00b7 friends get 20% off)','',12000);
+  }catch{toast('Referral service unreachable','err');}},
   'settings':()=>openSettings(),
   'save-settings':()=>{const g=k=>{const n=$('[data-k="'+k+'"]');return n?n.value.trim():'';};
     state.biz=g('sbiz');state.email=g('semail');state.payLink=g('spay');state.checkout='';
@@ -941,7 +955,7 @@ async function platformCheckout(plan) {
   toast('Connecting to secure checkout\u2026 first load after idle can take up to a minute.');
   try {
     const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 120000);
-    const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: location.href.split('#')[0].split('?')[0], plan: plan || undefined }), signal: ctl.signal });
+    const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: location.href.split('#')[0].split('?')[0], plan: plan || undefined, ref: localStorage.getItem('handoff.ref') || undefined }), signal: ctl.signal });
     clearTimeout(to);
     const d = await r.json();
     if (d.url) { top.location.href = d.url; return; }
@@ -949,7 +963,7 @@ async function platformCheckout(plan) {
   } catch {
     toast('Checkout is slow to wake \u2014 retrying once\u2026');
     try {
-      const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: location.href.split('#')[0].split('?')[0], plan: plan || undefined }) });
+      const r = await fetch(api('/api/checkout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: location.href.split('#')[0].split('?')[0], plan: plan || undefined, ref: localStorage.getItem('handoff.ref') || undefined }) });
       const d = await r.json();
       if (d.url) { top.location.href = d.url; return; }
     } catch {}
@@ -1034,6 +1048,7 @@ async function portalIssue(sid, pc) {
 /* ============ boot ============ */
 (function(){
   try{const sp=new URLSearchParams(location.search);
+    if(sp.get('ref')){try{localStorage.setItem('handoff.ref',sp.get('ref').trim().slice(0,40));}catch(e){} sp.delete('ref');history.replaceState(null,'',location.pathname+(sp.toString()?'?'+sp.toString():'')+location.hash);}
     if(sp.get('licensed')==='1'&&sp.get('session_id')){licIssue(sp.get('session_id')).catch(err=>{toast('Payment verified, but unlock failed: '+err.message+'. Leave this tab open and refresh in a minute.','err',15000);});}
     else if(sp.get('setup')==='1'&&sp.get('session_id')){setupIssue(sp.get('session_id')).catch(err=>{toast('Setup payment verified, but confirmation failed: '+err.message+'. Leave this tab open and refresh in a minute.','err',15000);});}
     else if(sp.get('portalgold')==='1'&&sp.get('session_id')&&sp.get('pc')){portalIssue(sp.get('session_id'),sp.get('pc')).catch(err=>{toast('Payment verified, but the mark-removal failed: '+err.message+'. Leave this tab open and refresh in a minute.','err',15000);});}

@@ -52,6 +52,31 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
       case 'checkout.session.completed': {
         const s = event.data.object;
         console.log(`[webhook] checkout completed session=${s.id} sub=${s.subscription} email=${(s.customer_details && s.customer_details.email) || 'n/a'}`);
+        try {
+          if (s.subscription && s.customer) {
+            /* mint/refresh the buyer's referral code + sync their own discount */
+            refCodeForCust(s.customer).catch(e => console.error('[referral-mint]', e.message));
+            syncReferrerDiscount(s.customer, s.subscription).catch(e => console.error('[referral-sync]', e.message));
+          }
+          const refCode = (s.metadata && s.metadata.ref) || '';
+          /* self-referral guard: promotion code metadata.referrer !== this buyer */
+          if (refCode && s.customer) {
+            const found = await stripe.promotionCodes.list({ code: refCode, active: true, limit: 1 });
+            const referrerCust = found.data.length && found.data[0].metadata ? found.data[0].metadata.referrer : '';
+            if (referrerCust && referrerCust !== s.customer) {
+              const referrerSubs = await stripe.subscriptions.list({ customer: referrerCust, status: 'active', limit: 1 });
+              if (referrerSubs.data.length) {
+                const referrer = await stripe.customers.retrieve(referrerCust);
+                const n = parseInt((referrer.metadata && referrer.metadata.referral_count) || '0', 10) + 1;
+                await stripe.customers.update(referrerCust, { metadata: Object.assign({}, referrer.metadata, { referral_count: String(n) }) });
+                await syncReferrerDiscount(referrerCust, referrerSubs.data[0].id);
+                console.log(`[referral-credit] ${refCode} -> referrer ${referrerCust} now ${n} referrals`);
+              }
+            } else if (referrerCust === s.customer) {
+              console.log(`[referral] self-referral ignored for ${s.customer}`);
+            }
+          }
+        } catch (e) { console.error('[webhook-referral]', e.message); }
         break;
       }
       default:
@@ -89,6 +114,62 @@ async function subscriptionActive(subId) {
   return ['active', 'trialing', 'past_due'].includes(sub.status);
 }
 
+/* ---------------- referral codes (Stripe-native, stateless) ---------------- */
+/* Every Pro subscriber gets a durable personal referral code minted from their
+ * Stripe customer id — no database needed; the customer object is the store.
+ * Anyone who applies a referrer's code at checkout gets X% off every bill
+ * while that code exists; the referrer's discount rate scales with referrals. */
+const REF_DISCOUNT_PCT = 20;      // % off for the referred buyer
+const REF_TIERS = [[1, 10], [4, 15], [10, 25]]; // [# referrals, % off referrer's own sub]
+
+function refCodeFromCust(custId) {
+  const hmac = crypto.createHmac('sha256', LICENSE_SECRET).update('ref:' + custId).digest('base64url');
+  return ('REF-' + hmac.replace(/[-_]/g, '').slice(0, 6).toUpperCase());
+}
+async function refCodeForCust(custId) {
+  const customer = await stripe.customers.retrieve(custId);
+  const code = refCodeFromCust(custId);
+  const existing = (customer.metadata && customer.metadata.referral_code) || '';
+  const referrals = parseInt((customer.metadata && customer.metadata.referral_count) || '0', 10);
+  const pct = REF_TIERS.filter(t => referrals >= t[0]).reduce((a, t) => t[1], 0);
+  if (existing === code) return { code, referrals, pct };
+  const promo = await stripe.promotionCodes.create({
+    coupon: { percent_off: REF_DISCOUNT_PCT, duration: 'forever', name: 'Handoff referral — ' + code },
+    code,
+    max_redemptions: REF_TIERS[REF_TIERS.length - 1][0] + 40,
+    metadata: { referrer: custId },
+  });
+  await stripe.customers.update(custId, { metadata: { referral_code: code, referral_count: String(referrals) } });
+  return { code: promo.code, referrals, pct };
+}
+async function refPctFor(custId) {
+  try {
+    const customer = await stripe.customers.retrieve(custId);
+    const referrals = parseInt((customer.metadata && customer.metadata.referral_count) || '0', 10);
+    return REF_TIERS.filter(t => referrals >= t[0]).reduce((a, t) => t[1], 0);
+  } catch { return 0; }
+}
+
+/* Keep the referrer's own subscription discount in sync with their tier.
+ * Coupons use deterministic IDs so tiers reuse one coupon per pct. */
+async function syncReferrerDiscount(custId, subId) {
+  const pct = await refPctFor(custId);
+  const sub = await stripe.subscriptions.retrieve(subId);
+  const cur = parseInt((sub.metadata && sub.metadata.ref_pct) || '0', 10);
+  if (pct === cur) return;
+  if (pct === 0) {
+    await stripe.subscriptions.update(subId, { discounts: [], metadata: Object.assign({}, sub.metadata, { ref_pct: '0' }) });
+    return;
+  }
+  const couponId = 'ref_self_' + pct;
+  try {
+    await stripe.coupons.retrieve(couponId);
+  } catch {
+    await stripe.coupons.create({ id: couponId, percent_off: pct, duration: 'forever', name: 'Handoff referrer — ' + pct + '% off' });
+  }
+  await stripe.subscriptions.update(subId, { discounts: [{ coupon: couponId }], metadata: Object.assign({}, sub.metadata, { ref_pct: String(pct) }) });
+}
+
 /* ---------------- routes ---------------- */
 app.get('/healthz', (req, res) => res.json({ ok: true, service: 'handoff-api' }));
 
@@ -113,6 +194,19 @@ app.post('/api/checkout', async (req, res) => {
     }
     if (!base) return res.status(400).json({ error: 'No SITE_URL and no Origin header' });
     const email = (req.body && typeof req.body.email === 'string' && req.body.email.includes('@')) ? req.body.email.trim() : undefined;
+    const refCode = (req.body && typeof req.body.ref === 'string') ? req.body.ref.trim().slice(0, 40) : (req.query.ref || '').trim().slice(0, 40);
+    let discount;
+    if (refCode) {
+      try {
+        const found = await stripe.promotionCodes.list({ code: refCode, active: true, limit: 1 });
+        if (found.data.length) {
+          discount = [{ promotion_code: found.data[0].id }];
+          console.log(`[create-checkout] referral code ${refCode} -> promo ${found.data[0].id} (referrer ${found.data[0].metadata && found.data[0].metadata.referrer || 'n/a'})`);
+        } else {
+          console.log(`[create-checkout] referral code ${refCode} not found/inactive — ignoring`);
+        }
+      } catch (e) { console.error('[create-checkout] ref lookup failed:', e.message); }
+    }
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: PRICE_ID, quantity: 1 }],
@@ -120,6 +214,8 @@ app.post('/api/checkout', async (req, res) => {
       cancel_url: `${base}/?canceled=1`,
       customer_email: email,
       allow_promotion_codes: true,
+      ...(discount ? { discounts: discount, allow_promotion_codes: false } : {}),
+      metadata: refCode ? { ref: refCode } : {},
     });
     console.log(`[create-checkout] session=${session.id} email=${email || 'n/a'}`);
     res.json({ url: session.url });
@@ -194,12 +290,18 @@ app.get('/api/license/issue', async (req, res) => {
       return res.status(402).json({ error: 'Subscription not active' });
     }
     const email = (session.customer_details && session.customer_details.email) || '';
+    const custId = session.customer || undefined;
     const lic = signLicense({
-      v: 1, sub: subId, cust: session.customer || undefined,
+      v: 1, sub: subId, cust: custId,
       email, iat: Date.now(),
       exp: Date.now() + LICENSE_TTL_DAYS * 864e5,
     });
     console.log(`[license-issue] sub=${subId} email=${email}`);
+    if (custId) {
+      /* mint their referral code + sync their own referral discount; never block issuance */
+      refCodeForCust(custId).catch(e => console.error('[referral-mint]', e.message));
+      syncReferrerDiscount(custId, subId).catch(e => console.error('[referral-sync]', e.message));
+    }
     res.json({ license: lic, plan: 'pro', ttlDays: LICENSE_TTL_DAYS });
   } catch (e) {
     console.error('[license-issue]', e.message);
@@ -268,6 +370,23 @@ app.post('/api/portal', async (req, res) => {
   } catch (e) {
     console.error('[portal]', e.message);
     res.status(500).json({ error: 'Could not open portal' });
+  }
+});
+
+/* The caller's personal referral code + live tier (from their license). */
+app.get('/api/referral', async (req, res) => {
+  try {
+    const lic = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+    const payload = verifyLicense(lic);
+    if (!payload || !payload.sub) return res.status(401).json({ error: 'invalid license' });
+    if (!(await subscriptionActive(payload.sub))) return res.status(402).json({ error: 'subscription_inactive', plan: 'free' });
+    const custId = payload.cust;
+    if (!custId) return res.status(401).json({ error: 'license has no customer' });
+    const info = await refCodeForCust(custId);
+    res.json(Object.assign({ buyerPct: REF_DISCOUNT_PCT }, info));
+  } catch (e) {
+    console.error('[referral]', e.message);
+    res.status(500).json({ error: 'Could not load referral info' });
   }
 });
 
