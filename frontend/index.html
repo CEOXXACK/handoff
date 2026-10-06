@@ -492,7 +492,7 @@ const TPL={
       {t:'Usage guide',n:'Do / don\u2019t examples and licensing notes',u:'',s:0}]})};                                                                     /* ============ views ============ */
 function topbarApp(){return `<header class="top noprint"><div class="wrap top-in">
   <a class="wordmark" href="#/"><span class="wm-mark">H</span>Handoff</a>
-  <span class="plan-chip mono-label">${state.plan==='pro'?'Pro plan':'Free ·              '+activeCount()+'/2 active'}</span>
+  <span class="plan-chip mono-label">${state.plan==='pro'?'Pro plan':'Free ·              '+activeCount()+'/1 active'}</span>
   <nav class="top-nav">                                                                       ${state.plan!=='pro'?`<a class="nav-a pro" href="#/pro" data-action="pro">Go
 Pro</a>`:''}                                                                             <button class="nav-a" data-action="settings">Settings</button>
     <a class="btn btn-green sm" href="#/new"><i data-lucide="plus"></i>New                portal</a>
@@ -553,7 +553,7 @@ product, not a demo. Pro exists for people who deliver for a living — and remo
 the ceiling.</p>                                                                                <p class="fine" style="margin-top:28px">Handoff never touches your money.           Invoices are yours.</p>                                                                       </div>                                                                                    <div class="tiers">
       <div class="tier"><span class="mono-label">Free</span><div                          class="t-price">$0<span> / forever</span></div>
         <ul class="t-list">
-          <li><i data-lucide="check"></i>2 active portals</li>                                      <li><i data-lucide="check"></i>5 deliverables per portal</li>                             <li><i data-lucide="check"></i>Curated brand presets</li>                                 <li><i data-lucide="check"></i>Acceptance trail by email</li>
+          <li><i data-lucide="check"></i>1 active portal</li>                                      <li><i data-lucide="check"></i>5 deliverables per portal</li>                             <li><i data-lucide="check"></i>Curated brand presets</li>                                 <li><i data-lucide="check"></i>Acceptance trail by email</li>
           <li><i data-lucide="check"></i>Handoff mark on portals — your clients
 discover how you shipped it</li>
         </ul>
@@ -616,7 +616,7 @@ data-lucide="${p.archived?'archive-restore':'archive'}"></i></button>           
 aria-label="Delete" title="Delete"><i data-lucide="trash-2"></i></button>                       </div></article>`;}).join('');
   app.innerHTML=`<div class="view">${topbarApp()}<main class="wrap studio">                   <div class="s-head"><div><h2 class="display-2">Studio</h2>
       <p class="lede-sm" style="margin-top:8px">Every portal is one self-contained        link. Copy it, send it — it opens anywhere, for anyone.</p></div>
-      <span class="plan-chip mono-label">${state.plan==='pro'?'Pro plan':'Free plan       · '+activeCount()+'/2 active'}</span></div>
+      <span class="plan-chip mono-label">${state.plan==='pro'?'Pro plan':'Free plan       · '+activeCount()+'/1 active'}</span></div>
     ${state.portals.length?`<div class="p-list">${rows}</div>`:emptyStudio()}               </main></div>`;
   refreshIcons();}                                                                        /* builder */
 let draft=null,editing=null;
@@ -658,9 +658,9 @@ function renderBuilder(id){
   editing=id||null;
   if(editing){const p=state.portals.find(x=>x.id===editing);
     if(!p){toast('That portal no longer exists.','err');return go('#/studio');}
-    draft=JSON.parse(JSON.stringify(p.data));}                                              else draft=defaultDraft();                                                                const banner=(!editing&&state.plan!=='pro'&&activeCount()>=2)
+    draft=JSON.parse(JSON.stringify(p.data));}                                              else draft=defaultDraft();                                                                const banner=(!editing&&state.plan!=='pro'&&activeCount()>=1)
     ?`<div class="m-note-banner"><span class="mono-label"
-style="color:var(--verm)">Free plan full — ${activeCount()}/2 active
+style="color:var(--verm)">Free plan full — ${activeCount()}/1 active
 portals.</span><a class="tlink" href="#/pro" data-action="pro">Go Pro</a><span
 class="mono-label" style="color:var(--ink3)">or archive one in the
 studio</span></div>`:'';
@@ -728,7 +728,7 @@ class="mono-label" style="color:var(--ink3)">live · updates as you type</span><
   if(!draft.project.trim()){ok=false;pj.closest('.field').classList.add('bad');$('#errProject').hidden=false;pj.focus();}                                                                    else{$('#errProject').hidden=true;pj.closest('.field').classList.remove('bad');}
   if(!draft.items.some(i=>i.t.trim())){ok=false;$('#errItems').hidden=false;}else
 $('#errItems').hidden=true;
-  if(!ok)return;                                                                            if(!editing&&state.plan!=='pro'&&activeCount()>=2){openUpgrade();return;}
+  if(!ok)return;                                                                            if(!editing&&state.plan!=='pro'&&activeCount()>=1){openUpgrade();return;}
   const code=await makeCode(draft,state.plan);
   if(editing){const p=state.portals.find(x=>x.id===editing);
     const stillPaid=!!(p&&p.paid&&p.code===code); /* editing produces a fresh code — the paid unlock stays with the original link */
@@ -890,7 +890,7 @@ a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hando
   'del':el=>{const p=state.portals.find(x=>x.id===el.dataset.id);if(!p)return;
     confirmBox({title:'Delete \u201C'+(p.data.project||'Untitled')+'\u201D?',body:'It disappears from this studio. Links already sent keep working — their data is baked in.',yes:'Delete portal',danger:true})
                                                                                           .then(y=>{if(!y)return;state.portals=state.portals.filter(x=>x.id!==el.dataset.id);save();route();toast('Portal deleted.');});},                                                            'tpl':el=>{(async()=>{const t=el.dataset.tpl;
-    if(state.plan!=='pro'&&activeCount()>=2){openUpgrade();return;}                                                             const data=t==='sample'?JSON.parse(JSON.stringify(SAMPLE)):TPL[t]();
+    if(state.plan!=='pro'&&activeCount()>=1){openUpgrade();return;}                                                             const data=t==='sample'?JSON.parse(JSON.stringify(SAMPLE)):TPL[t]();
     const code=await makeCode(data,state.plan);
     const                                                                                 p={id:uid(),created:Date.now(),archived:false,data,code,url:shareURL(code)};
     state.portals.push(p);save();toast('Portal created.');                                    go('#/studio');setTimeout(()=>openShare(p.id),260);})();},

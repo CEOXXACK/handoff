@@ -2,7 +2,7 @@
 
 **Send client work in one link.** Client-delivery portal SaaS: studios build a branded
 portal (deliverables, approvals, payment), send it as a single URL, track opens and
-signoff. Free: 2 active portals / 5 deliverables each. Pro: $15/mo.
+signoff. Free: 1 active portal / 5 deliverables each. Pro: $15/mo.
 
 ## Live
 
